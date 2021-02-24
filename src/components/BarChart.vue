@@ -1,0 +1,44 @@
+<!-- Your HTML goes here -->
+<template>
+    <div>Bar Chart</div>
+</template>
+
+<script>
+import * as d3 from 'd3'
+
+export default {
+    name: 'BarChart', // Feel free to rename this and the file
+    props: {
+        dataset: {
+            required: true
+        },
+        width: {
+            required: true
+        },
+        height: {
+            required: true
+        }
+    },
+    data() {
+
+    },
+    mounted() {
+        this.init()
+    },
+    computed: {
+        viewBox() {
+            return `0 0 ${this.width} ${this.height}`;
+        },
+    },
+    methods: {
+        init() {
+            console.log(d3) 
+        }
+    }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+/* Add your CSS here */
+</style>

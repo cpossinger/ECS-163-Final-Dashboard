@@ -19,9 +19,9 @@ export default {
             required: true
         }
     },
-    data() {
+    data: () =>  ({
 
-    },
+    }),
     mounted() {
         this.init()
     },
@@ -32,7 +32,8 @@ export default {
     },
     methods: {
         init() {
-            console.log(d3) 
+            console.log(d3)
+          console.log(this.dataset)
         }
     }
 }

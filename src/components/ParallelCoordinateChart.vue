@@ -132,8 +132,7 @@ export default {
                 .append("title")
                     .text(d => d.name);
         },
-        // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-scatterplot
-        // copied from project 4, to be repurposed
+        // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-parallel-coordinates
         brushed({selection}, key) {
             if (selection === null) this.selections.delete(key);
             else this.selections.set(key, selection.map(this.x.get(key).invert));

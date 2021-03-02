@@ -14,7 +14,7 @@
     "d3-dsv": "^2.0.0",
     "d3-fetch": "^2.0.0",
     "vue": "^2.6.11",
-    "vuetify": "^2.4.0"
+    "vuetify": "^2.4.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

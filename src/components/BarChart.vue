@@ -19,9 +19,6 @@ export default {
             required: true
         }
     },
-    data() {
-
-    },
     mounted() {
         this.init()
     },

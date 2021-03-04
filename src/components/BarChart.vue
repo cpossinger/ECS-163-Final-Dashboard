@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import * as d3 from 'd3'
+//import * as d3 from 'd3'
 
 export default {
     name: 'BarChart', // Feel free to rename this and the file
@@ -19,6 +19,12 @@ export default {
             required: true
         }
     },
+    data() {
+      return{
+
+      }
+
+    },
     mounted() {
         this.init()
     },
@@ -29,7 +35,6 @@ export default {
     },
     methods: {
         init() {
-            console.log(d3) 
         }
     }
 }

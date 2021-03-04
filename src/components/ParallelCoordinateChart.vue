@@ -1,6 +1,6 @@
 <!-- Your HTML goes here -->
 <template>
-     <svg class='pc-container' :viewBox='viewBox'>
+     <svg class='container' :viewBox='viewBox'>
             <g class='pc-lines'></g>
             <g class='pc-axes'></g>
         </svg>
@@ -25,7 +25,6 @@ export default {
     data() {
         return {
             keys: null,
-            selections: null,
             margin: {
                top: 20,
                bottom: 20,
@@ -44,12 +43,9 @@ export default {
     },
     methods: {
         init() {
-            this.dataset = this.dataset.slice(0, 500)
-            console.log(this.dataset)
 
             this.x = null
             this.y = d3.scalePoint()
-            this.brush = d3.brushX()
     
             // Selector. To be implemented at later point.
             // this.z = d3.scaleSequential()
@@ -64,26 +60,11 @@ export default {
             let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
             this.dataset = Object.assign(this.dataset, {columns})
             this.keys = this.dataset.columns
-            console.log(this.keys)
-            this.selections = new Map()
-            console.log(this.selections)
 
             this.x = new Map(Array.from(this.keys, key => [key, d3.scaleLinear(d3.extent(this.dataset, d => d[key]), 
                 [this.margin.left, this.width - this.margin.right])]))
-            console.log(this.x)
 
             this.y = d3.scalePoint(this.keys, [this.margin.top, this.height - this.margin.bottom])
-            console.log(this.y)
-            
-            this.brush = d3.brushX()
-                .extent([
-                    [this.margin.left, -(50 / 2)],
-                    [this.width - this.margin.right, 50 / 2]
-                ])
-                .on("start brush end", this.brushed);
-
-            d3.select('.pc_container')
-                .call(this.brush)
 
             // this.z = 
 
@@ -91,7 +72,6 @@ export default {
                 .defined(([, value]) => value != null)
                 .x(([key, value]) => this.x.get(key)(value))
                 .y(([key]) => this.y(key))
-            console.log(this.line)
 
             this.render_lines()
             this.render_axes()
@@ -116,8 +96,7 @@ export default {
                         .attr("fill", "none")
                         .attr("stroke-width", 5)
                         .attr("stroke-linejoin", "round")
-                        .attr("stroke", "white"))
-                    .call(this.brush)
+                        .attr("stroke", "white"));
         },
         render_lines() {
             d3.select('.pc-lines')
@@ -132,22 +111,25 @@ export default {
                 .append("title")
                     .text(d => d.name);
         },
-        // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-parallel-coordinates
-        brushed({selection}, key) {
-            if (selection === null) this.selections.delete(key);
-            else this.selections.set(key, selection.map(this.x.get(key).invert));
-            const selected = [];
-            d3.select('.pc-lines')
-                .selectAll('path')
-                    .each((d, i, nodes) => {
-                        const active = Array.from(this.selections).every(([key, [min, max]]) => d[key] >= min && d[key] <= max);
-                        d3.select(nodes[i]).style("stroke", active ? 'steelblue' : '#ddd');
-                        if (active) {
-                            d3.select(nodes[i]).raise();
-                            selected.push(d);
-                        }
-                    })
-                .property("value", selected).dispatch("input");
+        // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-scatterplot
+        // copied from project 4, to be repurposed
+        brushed({selection}) {
+            let value = [];
+            if (selection) {
+                const [[x0, y0], [x1, y1]] = selection;
+                value = d3.select('.points').selectAll('circle')
+                    .style('stroke-width', 1.3)
+                    .filter(d => x0 <= this.x(d.stats.attack) && this.x(d.stats.attack) < x1 && y0 <= this.y(d.stats.defense) && this.y(d.stats.defense) < y1)
+                    .style('stroke-width', 2.5)
+                    .data();
+              
+            } else {
+                d3.select('.points').selectAll('circle')
+                    .style('stroke-width', 1.3)
+            }
+            d3.select('.sp_container')
+                .property("value", value).dispatch("input");
+            this.$emit('selected_pokemon', value)
         }
     }
 }

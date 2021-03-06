@@ -52,7 +52,7 @@ export default {
       xAxis: null,
       area: null,
       x: null,
-      series_keys: null,
+      areas: null,
       Tooltip: null
 
 
@@ -63,7 +63,7 @@ export default {
 
   },
     mounted() {
-        this.init()
+        this.init();
     },
 
     methods: {
@@ -110,11 +110,10 @@ export default {
               .order(d3.stackOrderInsideOut)
 
           this.series = series_const(series_data);
-          //console.log(this.series);
-          this.constrStream()
+          this.constrStream();
         },
-      constrStream(){
 
+      constrStream(){
         d3.select(".streamGraph").remove();
         let margin = ({top: 0, right: 20, bottom: 30, left: 20});
 
@@ -153,27 +152,32 @@ export default {
             .attr("height",this.height);
 
 
-        this.Tooltip = this.svg
+         this.Tooltip = this.svg
             .append("text")
             .attr("x", 0)
-            .attr("y", 0)
+            .attr("y", 20)
             .style("opacity", 0)
             .style("font-size", 17)
 
-       let areas = this.svg.append("g")
+
+
+
+        this.areas = this.svg.append("g")
             .selectAll("path")
             .data(this.series)
-            .join("path")
-           .attr("class","area")
-           .attr("fill", ({key}) => color(key))
-            .attr("d", this.area(this.series,this.x))
-            .append("title")
-            .text(({key}) => key)
-            .on("mouseover",this.mouseover)
-            .on("mousemove",this.mousemove)
-            .on("mouseleave",this.mouseleave);
+      .join("path")
+            .on("mouseover",this.over)
+            .on("mousemove",this.moved)
+            .on("mouseleave",this.leave)
+            .on("click",this.clicked)
+            .attr("fill", ({key}) => color(key))
+            .attr("class","area")
+            .attr("clip-path","url(#clip)")
+            .attr("d", this.area(this.series,this.x));
 
-        areas.attr("clip-path","url(#clip)");
+
+
+
 
          this.zoom = d3.zoom()
             .scaleExtent([1, 32])
@@ -185,31 +189,32 @@ export default {
 
          this.gx = this.svg.append("g")
             .call(this.xAxis, this.x);
+        //let keys = this.series_keys;
 
 
 
+
+
       },
-         mousemove(d,i) {
-          console.log("mousemove");
-        let grp = this.series_keys[i]
-        this.Tooltip.text(grp)
+      moved(event,d){
+          this.Tooltip.text(d.key);
       },
-       mouseover(d) {
-          console.log("mouseover");
-          let mouseover_func = function (d,self) {
-           self.Tooltip.style("opacity", 1)
-           d3.selectAll(".area").style("opacity", .2)
-           d3.select(this)
-               .style("stroke", "black")
-               .style("opacity", 1)
-         }
-         mouseover_func(d,this);
+      over(event){
+        this.Tooltip.style("opacity", 1);
+        d3.selectAll(".area").style("opacity", .2)
+            d3.select(event.currentTarget)
+            .style("stroke", "black")
+            .style("opacity", 1);
+
       },
-       mouseleave() {
-          console.log("mouseleave");
-          this.Tooltip.style("opacity", 0)
-          d3.selectAll(".myArea").style("opacity", 1).style("stroke", "none")
+      leave(){
+        this.Tooltip.style("opacity", 0)
+        d3.selectAll(".area").style("opacity", 1).style("stroke", "none")
       },
+      clicked(event,d){
+      this.$emit("clicked",d.key);
+      },
+
       zoomed(event) {
           const xz = event.transform.rescaleX(this.x);
           this.svg.selectAll("path")

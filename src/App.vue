@@ -35,6 +35,7 @@
           :height='200'
           :attrVal="attrVal"
           :groupVal="groupVal"
+          @clicked="setSelectedGroup"
       />
         </v-col>
       </v-row>
@@ -85,7 +86,8 @@ export default {
     groupValItems: ["Genre","Platform","Publisher","Developer"],
     attrValItems: ["Critic_Score","User_Score","Total_Shipped","Global_Sales","NA_Sales","PAL_Sales","JP_Sales"],
     groupVal: "Genre",
-    attrVal: "Global_Sales"
+    attrVal: "Global_Sales",
+    selectedGroup: null
 
   }),
   created() {
@@ -121,6 +123,9 @@ export default {
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
+    },
+    setSelectedGroup(group){
+     this.selectedGroup = group;
     }
   }
 };

@@ -27,8 +27,11 @@
           class='bar-chart'
           v-if='dataset'
           :dataset='dataset'
-          width='0'
-          height='0'
+          :width='500'
+          :height='500'
+          attribX="Genre"
+          attribY="Total_Shipped"
+          :setFilter="barChartFiltering"
       />
 
     </v-main>
@@ -78,6 +81,9 @@ export default {
         })
     },
   methods: {
+    barChartFiltering(attribX, selected) {
+      console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
+    }
   }
 };
 </script>

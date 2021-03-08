@@ -15,6 +15,12 @@ export default {
         dataset: {
             required: true
         },
+        publisher: {
+            required: true
+        },
+        platform: {
+            required: true
+        },
         width: {
             required: true
         },

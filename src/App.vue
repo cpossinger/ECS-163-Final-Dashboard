@@ -20,6 +20,8 @@
           class='pc-chart'
           v-if='dataset'
           :dataset='dataset'
+          @publisher='publisher_selected'
+          @platform='platform_selected'
           width='800'
           height='600'
       />

@@ -37,7 +37,6 @@ export default {
       type: Function,
       required: true
     }
-
   },
   data() {
     return {
@@ -56,7 +55,6 @@ export default {
     },
   },
   methods: {
-
     renderData() {
       console.log("bar data")
       this.total = 0
@@ -64,7 +62,6 @@ export default {
       d3.group(this.dataset, d=> {
         return d[this.attribX]
       })
-
           .forEach(
               (value, key) => {
                 console.log("barchart foreach", key, value)
@@ -87,7 +84,6 @@ export default {
           .text(d => d.data.toFixed(0))
   */
     },
-
     renderBars() {
       d3.select(".bars").selectAll("*").remove()
       let bars = d3.select(".bars")
@@ -124,7 +120,6 @@ export default {
             .text(d.data.toFixed(2))
       }
     },
-
     renderAxes() {
       console.log("bar axes")
       let vert = d3.axisLeft(this.vertical)
@@ -132,7 +127,6 @@ export default {
       let hori = d3.axisBottom(this.horizontal)
       d3.select(".bar-horizontal").call(hori)
     },
-
     init() {
       d3.select(".barchart").attr("width", this.width).attr("height", this.height)
       console.log("bar init")
@@ -150,7 +144,6 @@ export default {
           i--
         }
       }
-
       this.init()
     },
     attribX() {

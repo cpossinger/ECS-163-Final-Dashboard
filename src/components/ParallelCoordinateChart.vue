@@ -15,6 +15,15 @@ export default {
     dataset: {
       required: true
     },
+    attrVal: {
+        required: true
+    },
+    groupVal: {
+        required: true
+    },
+    clicked: {
+        required: true
+    },
     width: {
       required: true
     },
@@ -25,7 +34,8 @@ export default {
   data() {
     return {
       keys: null,
-      selections: null,
+      selected: null,
+      groupSelected: false,
       margin: {
         top: 20,
         bottom: 20,
@@ -33,6 +43,13 @@ export default {
         right: 20,
       }
     }
+  },
+  watch: {
+      clicked() {
+          this.groupSelected = true
+          this.update()
+          this.groupSelected = false
+      }
   },
   mounted() {
     this.init()
@@ -44,8 +61,7 @@ export default {
   },
   methods: {
     init() {
-      this.dataset = this.dataset.slice(0, 500)
-      console.log(this.dataset)
+      console.log(this.selection)
 
       this.x = null
       this.y = d3.scalePoint()
@@ -62,6 +78,9 @@ export default {
 
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
+      if (this.clicked) {
+            this.dataset = d3.filter(d => d[this.groupVal] == this.clicked)
+      }
       this.dataset = Object.assign(this.dataset, {columns})
       this.keys = this.dataset.columns
       console.log(this.keys)
@@ -94,7 +113,9 @@ export default {
       console.log(this.line)
 
       this.render_lines()
-      this.render_axes()
+      if (this.groupSelected == false) {
+            this.render_axes()
+      }
     },
     render_axes() {
       d3.select('.pc-axes')
@@ -103,6 +124,7 @@ export default {
           .join('g')
           .attr("transform", d => `translate(0,${this.y(d)})`)
           .each((d, i, nodes) => {
+            // This is where the issue is.
             d3.select(nodes[i]).call(d3.axisBottom(this.x.get(d)));
           })
           .call(g => g.append("text")
@@ -110,7 +132,7 @@ export default {
               .attr("y", -6)
               .attr("text-anchor", "start")
               .attr("fill", "black")
-              .text(d => d))
+              .text(d => this.axis_text(d)))
           .call(g => g.selectAll("text")
               .clone(true).lower()
               .attr("fill", "none")
@@ -131,6 +153,12 @@ export default {
           .attr("d", d => this.line(d3.cross(this.keys, [d], (key, d) => [key, d[key]])))
           .append("title")
           .text(d => d.name);
+    },
+    axis_text(s) {
+        console.log(s)
+        let labels = {Critic_Score:'Critic Score', User_Score:'User Score', Total_Shipped:'Total Shipped (m)', 
+                        Global_Sales:'Global Sales (m)'}
+        return labels[s]
     },
     // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-parallel-coordinates
     brushed({selection}, key) {

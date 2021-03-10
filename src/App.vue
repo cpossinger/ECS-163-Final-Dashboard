@@ -18,6 +18,8 @@
           v-model="attrVal"
           label="Select Attribute"
           :items="attrValItems"
+          item-text='label'
+          item-value='value'
           hide-details
           :menu-props="{top: true, offsetY: true}"
       ></v-select>
@@ -47,6 +49,9 @@
               class='pc-chart'
               v-if='dataset'
               :dataset='dataset'
+              :attrVal="attrVal"
+              :groupVal="groupVal"
+              :clicked='clicked'
               width='800'
               height='600'
 
@@ -57,6 +62,8 @@
               class='bar-chart'
               v-if='dataset'
               :dataset='dataset'
+              :attrVal="attrVal"
+              :groupVal="groupVal"
               :width='500'
               :height='500'
               attribX= 'Genre'
@@ -89,10 +96,18 @@ export default {
   data: () => ({
     dataset: null,
     groupValItems: ["Genre","Platform","Publisher","Developer"],
-    attrValItems: ["Critic_Score","User_Score","Total_Shipped","Global_Sales","NA_Sales","PAL_Sales","JP_Sales"],
+    attrValItems: [
+        {value: 'Critic_Score', label: "Critic Score"},
+        {value: 'User_Score', label: "User Score"},
+        {value: 'Total_Shipped', label: "Total Shipped"},
+        {value: 'Global_Sales', label: "Global Sales"},
+        {value: 'NA_Sales', label: "North America Sales"},
+        {value: 'PAL_Sales', label: "PAL Region Sales"},
+        {value: 'JP_Sales', label: "Japan Sales"},
+    ],
     groupVal: "Genre",
     attrVal: "Global_Sales",
-    selectedGroup: null
+    clicked: null
 
   }),
   created() {
@@ -133,12 +148,28 @@ export default {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
     },
     setClickedVal(val){
-    this.selectedGroup = val;
+    this.clicked = val;
+    },
+    label(s) {
+        let labels = 
+            {Critic_Score: "Critic Score",
+            User_Score: "User_Score",
+            Total_Shipped: "Total Shipped",
+            Global_Sales: "Global_Sales",
+            NA_Sales: "North America Sales",
+            PAL_Sales: "PAL Region Sales",
+            JP_Sales: "Japan Sales"}
+        return labels[s]
     }
   }
 };
 </script>
 
 <style>
-
+.stream-graph {
+    padding-top: 40px;
+    padding-left: 80px;
+    padding-right: 80px;
+    border-color: 'black';
+}
 </style>

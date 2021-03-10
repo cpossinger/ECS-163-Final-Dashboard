@@ -68,6 +68,7 @@ export default {
 
     methods: {
         init() {
+
           let genre_sales = null;
           if(this.attrVal.includes("Score") === true){
 
@@ -110,6 +111,7 @@ export default {
               .order(d3.stackOrderInsideOut)
 
           this.series = series_const(series_data);
+          console.log(this.series)
           this.constrStream();
         },
 

@@ -33,6 +33,10 @@ export default {
       type: String,
       required: true
     },
+    selectedGroupStream: {
+     type: String,
+     required: true
+    },
     setFilter: {
       type: Function,
       required: true
@@ -56,15 +60,14 @@ export default {
   },
   methods: {
     renderData() {
-      console.log("bar data")
       this.total = 0
       this.fixed_data = []
       d3.group(this.dataset, d=> {
         return d[this.attribX]
       })
           .forEach(
+              // eslint-disable-next-line no-unused-vars
               (value, key) => {
-                console.log("barchart foreach", key, value)
                 let sum = 0;
                 for (let i = 0; i < value.length; i++) {
                   sum += value[i][this.attribY]
@@ -73,6 +76,7 @@ export default {
                 this.total += sum
               }
           )
+      console.log("fixed data: ",this.fixed_data);
       this.horizontal = d3.scaleLinear().domain([d3.min(this.fixed_data, d=>d.data), 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width])
       this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.height])
       this.renderBars()
@@ -89,7 +93,6 @@ export default {
       let bars = d3.select(".bars")
       for (let i = 0; i < this.fixed_data.length; i++) {
         let d = this.fixed_data[i]
-        console.log("selection length", this.selection.length == 0)
         let sel = this.selection.length == 0 || this.selection.includes(d.bar)
         bars.append("rect")
             .attr("class", "bar")
@@ -99,7 +102,6 @@ export default {
             .attr("width", this.horizontal(d.data))
             .attr("data", d.bar)
             .on("click", d => {
-              //console.log("mouseclick", d,i, d3.select(d.target).attr("data"))
               let clicked = d3.select(d.target).attr("data")
               let index = this.selection.indexOf(clicked)
               if (index != -1) {
@@ -121,7 +123,6 @@ export default {
       }
     },
     renderAxes() {
-      console.log("bar axes")
       let vert = d3.axisLeft(this.vertical)
       d3.select(".bar-vertical").call(vert)
       let hori = d3.axisBottom(this.horizontal)
@@ -129,7 +130,6 @@ export default {
     },
     init() {
       d3.select(".barchart").attr("width", this.width).attr("height", this.height)
-      console.log("bar init")
       this.renderData()
       this.renderAxes()
     }

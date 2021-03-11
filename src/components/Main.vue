@@ -9,8 +9,7 @@
               :width='500'
               :height='200'
               :attrVal="attrVal"
-              :groupVal="groupVal"
-              @clicked="setClickedVal"
+              :groupVal="groupValStream"
           />
         </v-col>
       </v-row>
@@ -21,7 +20,7 @@
               v-if='dataset'
               :dataset='dataset'
               :attrVal="attrVal"
-              :groupVal="groupVal"
+              :groupVal="groupValStream"
               :clicked="clicked"
               width='800'
               height='600'
@@ -35,10 +34,9 @@
               :dataset='dataset'
               :width='500'
               :height='500'
-              :attrVal="attrVal"
-              :groupVal="groupVal"
-              attribX= 'Genre'
-              attribY='Total_Shipped'
+              :attribX= 'attrVal'
+              :attribY='groupValBar'
+              :selectedGroupStream="selectedGroupStream"
               :setFilter="barChartFiltering"
           />
         </v-col>
@@ -62,7 +60,13 @@ export default {
     attrVal: {
       required: true
     },
-    groupVal: {
+    groupValBar: {
+      required: true
+    },
+    groupValStream: {
+      required: true
+    },
+    selectedGroupStream: {
       required: true
     },
     barChartFiltering: {
@@ -79,15 +83,27 @@ export default {
         },
         deep: true
       },
+      groupValBar: {
+        handler: function (val){
+          this.groupValBar = val;
+        },
+        deep: true
+      },
       clicked: {
         handler: function (val){
           this.clicked = val;
         },
         deep: true
       },
-      groupVal: {
+      groupValStream: {
         handler: function (val){
-          this.groupVal = val;
+          this.groupValStream = val;
+        },
+        deep: true
+      },
+      selectedGroupStream: {
+        handler: function (val){
+          this.selectedGroupStream = val;
         },
         deep: true
       }
@@ -100,15 +116,12 @@ export default {
   },
 
   data: () => ({
-    dataset: null,
     selectedGroup: null
 
   }),
 
   methods: {
-    setClickedVal(val){
-      this.selectedGroup = val;
-    }
+
   }
 };
 </script>

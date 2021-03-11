@@ -9,8 +9,8 @@
       <v-app-bar-title>Video Games 1980-2019</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-select
-          v-model="groupVal"
-          label="Select Grouping Attribute"
+          v-model="groupValStream"
+          label="Select Steam Graph Grouping Attribute"
           :items="groupValItems"
           hide-details
           :menu-props="{top: true, offsetY: true,}"
@@ -19,6 +19,15 @@
           v-model="attrVal"
           label="Select Attribute"
           :items="attrValItems"
+          item-text="label"
+          item-value="value"
+          hide-details
+          :menu-props="{top: true, offsetY: true}"
+      ></v-select>
+      <v-select
+          v-model="groupValBar"
+          label="Select Bar Chart Group"
+          :items="groupValItems"
           item-text="label"
           item-value="value"
           hide-details
@@ -55,7 +64,8 @@
           <v-row  no-gutters>
       <keep-alive>
         <transition name="component-fade" mode="out-in">
-<component :is="component" v-bind="currentProps" v-if="dataset" />
+<component :is="component" v-bind="currentProps" v-if="dataset" @clicked="setClickedStreamVal" />
+
         </transition>
       </keep-alive>
         </v-row>
@@ -106,10 +116,11 @@ export default {
       {value: 'PAL_Sales', label: "PAL Region Sales"},
       {value: 'JP_Sales', label: "Japan Sales"},
     ],
-    groupVal: "Genre",
+    groupValStream: "Genre",
+    groupValBar: "Genre",
     attrVal: "Global_Sales",
     path: "url(/data/start_menu.png)",
-    clicked: null
+    selectedGroupStream: "Sports"
 
 
   }),
@@ -180,13 +191,18 @@ export default {
             PAL_Sales: "PAL Region Sales",
             JP_Sales: "Japan Sales"}
       return labels[s]
-    }
+    },
+    setClickedStreamVal(val){
+      this.selectedGroupStream = val;
+    },
+
   },
   created() {
     console.log("created");
     d3.csv('/data/vgsales-12-4-2019.csv', d3.autoType).then((data) => {
-      data = data.filter(obj => obj.Year != undefined);
+      data = data.filter(obj => obj.Year != null);
       data = data.filter(obj => obj.Year >= 1980);
+      console.log("data: ", data);
       this.dataset = d3.map(data, (d) => {
         return Object.assign(d, {
           Name: d.Name,
@@ -202,13 +218,13 @@ export default {
           //figure out how to convert number to UTC year instead of local time
           Year:  new Date(Date.UTC(d.Year)),
           //might have spelled something wrong
-          Vgchartzscore: +d.Vgchartzscore,
           NA_Sales: +d.NA_Sales,
           JP_Sales: +d.JP_Sales,
           PAL_Sales: +d.PAL_Sales,
         })
       })
     });
+
   },
   computed: {
     // eslint-disable-next-line vue/return-in-computed-property
@@ -247,7 +263,9 @@ export default {
         return {
           dataset: this.dataset,
           attrVal: this.attrVal,
-          groupVal: this.groupVal,
+          groupValBar: this.groupValBar,
+          groupValStream: this.groupValStream,
+          selectedGroupStream: this.selectedGroupStream,
           barChartFiltering: this.barChartFiltering
         }
       }

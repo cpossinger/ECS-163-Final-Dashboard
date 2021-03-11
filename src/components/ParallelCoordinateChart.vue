@@ -20,9 +20,7 @@ export default {
     groupVal: {
       required: true
     },
-    clicked: {
-      required: true
-    },
+
     width: {
       required: true
     },
@@ -44,11 +42,7 @@ export default {
     }
   },
   watch: {
-    clicked() {
-      this.groupSelected = true
-      this.update()
-      this.groupSelected = false
-    }
+
   },
   mounted() {
     this.init()
@@ -60,7 +54,6 @@ export default {
   },
   methods: {
     init() {
-      console.log(this.selection)
       this.x = null
       this.y = d3.scalePoint()
       this.brush = d3.brushX()
@@ -72,19 +65,13 @@ export default {
     update() {
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
-      if (this.clicked) {
-        this.dataset = d3.filter(d => d[this.groupVal] == this.clicked)
-      }
+
       this.dataset = Object.assign(this.dataset, {columns})
       this.keys = this.dataset.columns
-      console.log(this.keys)
       this.selections = new Map()
-      console.log(this.selections)
       this.x = new Map(Array.from(this.keys, key => [key, d3.scaleLinear(d3.extent(this.dataset, d => d[key]),
           [this.margin.left, this.width - this.margin.right])]))
-      console.log(this.x)
       this.y = d3.scalePoint(this.keys, [this.margin.top, this.height - this.margin.bottom])
-      console.log(this.y)
       this.brush = d3.brushX()
           .extent([
             [this.margin.left, -(50 / 2)],
@@ -98,7 +85,6 @@ export default {
           .defined(([, value]) => value != null)
           .x(([key, value]) => this.x.get(key)(value))
           .y(([key]) => this.y(key))
-      console.log(this.line)
       this.render_lines()
       if (this.groupSelected == false) {
         this.render_axes()
@@ -142,7 +128,6 @@ export default {
           .text(d => d.name);
     },
     axis_text(s) {
-      console.log(s)
       let labels = {Critic_Score:'Critic Score', User_Score:'User Score', Total_Shipped:'Total Shipped (m)',
         Global_Sales:'Global Sales (m)'}
       return labels[s]

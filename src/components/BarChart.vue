@@ -1,11 +1,12 @@
 <!-- Your HTML goes here -->
 <template>
   <div>
-    <svg class="bar-container" :width="width + 50" :height="height + 50" id="barchart" :viewBox='viewBox' >
+    <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" width="100%">
       <g transform="translate(100, 0)" class='bar-vertical'></g>
 
       <g transform="translate(100, 500)" class='bar-horizontal'></g>
       <g class="bars"></g>
+      <text class="text" id="horizontal-label"> </text>
     </svg>
   </div>
 </template>
@@ -33,18 +34,26 @@ export default {
       type: String,
       required: true
     },
+    streamGroup: {
+      type: String,
+      required: true
+    },
+    selectedGroupStream: {
+     type: String,
+     required: true
+    },
     setFilter: {
       type: Function,
       required: true
     }
-
   },
   data() {
     return {
       vertical: null,
       horizontal: null,
       selection: [],
-      fixed_data: []
+      fixed_data: [],
+      summmed_label: ""
     }
   },
   mounted() {
@@ -52,22 +61,29 @@ export default {
   },
   computed: {
     viewBox() {
-      return `0 0 ${this.width +1.25* buffer} ${this.height+buffer}`;
+      return `0 0 625 600`;
     },
   },
   methods: {
-
+    processStreamClick(data) {
+      console.log("process stream click", data)
+      this.selectedGroupStream = data
+    },
     renderData() {
-      console.log("bar data")
       this.total = 0
       this.fixed_data = []
-      d3.group(this.dataset, d=> {
-        return d[this.attribX]
-      })
+      let group = null
+      if (this.selectedGroupStream == "" || this.streamGroup == "" || this.selectedGroupStream == null || this.streamGroup == null) {
+        group = d3.group(this.dataset, d => d[this.attribX])
+      } else {
+        console.log("Filtering bar chart based on ", this.selectedGroupStream)
+        group = d3.group(this.dataset.filter(d => d[this.streamGroup] == this.selectedGroupStream), d=> {
+          return d[this.attribX]
+        })
+      }
 
-          .forEach(
-              (value, key) => {
-                console.log("barchart foreach", key, value)
+      group.forEach(
+              value => {
                 let sum = 0;
                 for (let i = 0; i < value.length; i++) {
                   sum += value[i][this.attribY]
@@ -76,24 +92,17 @@ export default {
                 this.total += sum
               }
           )
-      this.horizontal = d3.scaleLinear().domain([d3.min(this.fixed_data, d=>d.data), 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width])
-      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.height])
+      this.fixed_data = this.fixed_data.filter(d => d.data/this.total >= 0.01)
+      console.log("fixed data: ",this.fixed_data);
+      this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width]).nice() // this.width
+      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.width])//this.height
       this.renderBars()
-      /*
-      bars.append("text")
-          .attr("class", "label")
-          .attr("y", d => this.vertical(d.bar)+this.vertical.bandwidth()/2+4)
-          .attr("x", d => this.horizontal(d.data) + 4 + buffer)
-          .text(d => d.data.toFixed(0))
-  */
     },
-
     renderBars() {
       d3.select(".bars").selectAll("*").remove()
       let bars = d3.select(".bars")
       for (let i = 0; i < this.fixed_data.length; i++) {
         let d = this.fixed_data[i]
-        console.log("selection length", this.selection.length == 0)
         let sel = this.selection.length == 0 || this.selection.includes(d.bar)
         bars.append("rect")
             .attr("class", "bar")
@@ -102,8 +111,8 @@ export default {
             .attr("x", buffer)
             .attr("width", this.horizontal(d.data))
             .attr("data", d.bar)
+            .attr("val", d.data)
             .on("click", d => {
-              //console.log("mouseclick", d,i, d3.select(d.target).attr("data"))
               let clicked = d3.select(d.target).attr("data")
               let index = this.selection.indexOf(clicked)
               if (index != -1) {
@@ -114,49 +123,76 @@ export default {
               this.renderBars()
               this.setFilter(this.attribX, this.selection)
             })
+            .on("mouseover", d => {
+              let bar = d3.select(d.target).attr("data")
+              let value = d3.select(d.target).attr("val")
+              d3.select(".bar-container")
+                .append("text")
+                .attr("class", "bar-hover")
+                .attr("y", this.vertical(bar) + this.vertical.bandwidth()/2 + 4)
+                .attr("x", this.horizontal(value) + 4 + buffer)
+                .attr("font-size", "smaller")
+                .text(parseFloat(value).toFixed(2))
+            })
+            .on("mouseout", () => d3.selectAll(".bar-hover").remove())
             .attr("fill", "#CCC")
             .filter(() => sel)
             .attr("fill", "#377db6")
-        bars.append("text")
+       /* bars.append("text")
             .attr("class", "label")
             .attr("y", this.vertical(d.bar) + this.vertical.bandwidth()/2 + 4)
             .attr("x", this.horizontal(d.data) + 4 + buffer)
             .text(d.data.toFixed(2))
+      */
       }
     },
-
     renderAxes() {
-      console.log("bar axes")
       let vert = d3.axisLeft(this.vertical)
       d3.select(".bar-vertical").call(vert)
       let hori = d3.axisBottom(this.horizontal)
       d3.select(".bar-horizontal").call(hori)
     },
-
     init() {
-      d3.select(".barchart").attr("width", this.width).attr("height", this.height)
-      console.log("bar init")
+      console.log("bar chart", this.attribX, this.attribY)
+      //d3.select(".barchart").attr("width", ).attr("height", this.height)
       this.renderData()
       this.renderAxes()
+      let horizontal_label = d3.select("#horizontal-label")
+      horizontal_label.text(this.attribY.replace("_", " "))
+                      .attr("x", buffer + 0.5 * this.width) // this.width
+                      .attr("y", this.height + 0.5*buffer) // this.height
+                      .attr("text-anchor", "middle")
     }
   },
   watch: {
     data() {
       // Chart data was updated by main
       // Must check that every column in selection is still in the dataset, or remove it otherwise.
+      console.log("bar data changed")
       for (let i = 0; i < this.selection.length; i++) {
         if (this.data.map(d => d[this.attribX]).includes(this.selection[i])){
           this.selection.splice(i, 1)
           i--
         }
       }
-
       this.init()
     },
     attribX() {
+      console.log("bar attribX", this.attribX)
+      // None of the selection can be kept as we are using completely different variables
       this.selection = []
       this.init()
+    },
+    attribY() {
+      console.log("bar attribY", this.attribY)
+      // Keep selection
+      this.init()
+    },
+    selectedGroupStream() {
+      console.log("bar selectedGroupStream", this.selectedGroupStream)
+      this.init()
     }
+    // StreamGroup will in any healthy idea be associated with a change in the selectedGroupStream
   }
 }
 </script>

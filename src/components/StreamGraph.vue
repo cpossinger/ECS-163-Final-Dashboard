@@ -27,11 +27,15 @@ export default {
       },
       groupVal: {
         required: true
+      },
+      selectedGroupsBar: {
+        type: Object
       }
     },
   watch: {
       attrVal: {
         handler: function (val){
+          console.log("watch: attrval")
           this.attrVal = val;
           this.init();
        },
@@ -39,10 +43,18 @@ export default {
       },
     groupVal: {
       handler: function (val){
+        console.log("watch: groupVal")
         this.groupVal = val;
         this.init();
       },
       deep: true
+    },
+    selectedGroupsBar: {
+      handler: function (val) {
+        console.log("watch: selectedGroupsBar", val)
+        this.selectedGroupsBar = val
+        this.init()
+      }
     }
   },
     data: () =>  ({
@@ -52,14 +64,35 @@ export default {
       xAxis: null,
       area: null,
       x: null,
+      y: null,
       areas: null,
-      Tooltip: null
+      Tooltip: null,
+      data: null,
+      margin: null,
+      color: null
 
 
     }),
   created() {
 
+    this.margin = ({top: 0, right: 20, bottom: 30, left: 20});
+    this.xAxis = (g,x) => g
+        .attr("transform", `translate(0,${this.height - this.margin.bottom})`)
+        .call(d3.axisBottom(x).ticks(this.width / 80).tickSizeOuter(0))
+        .call(g => g.select(".domain").remove())
 
+    this.area = (data,x) => d3.area()
+        .x(d => x(d.data.date))
+        .y0(d =>  this.y(d[0]))
+        .y1(d => this.y(d[1]))
+
+
+
+    this.zoom = d3.zoom()
+        .scaleExtent([1, 32])
+        .extent([[this.margin.left, 0], [this.width - this.margin.right, this.height]])
+        .translateExtent([[this.margin.left, -Infinity], [this.width - this.margin.right, Infinity]])
+        .on("zoom", this.zoomed);
 
   },
     mounted() {
@@ -68,14 +101,21 @@ export default {
 
     methods: {
         init() {
-
+          this.data = this.dataset.filter(obj => obj[this.groupVal] != 0 && obj[this.attrVal] != 0);
+          if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
+            this.data = this.data.filter(obj => this.selectedGroupsBar.values.includes(obj[this.selectedGroupsBar.attrib]))
+          }
+console.log("this.data: ",this.data);
           let genre_sales = null;
           if(this.attrVal.includes("Score") === true){
 
-            genre_sales = d3.rollup(this.dataset, v => d3.mean(v, d => d[this.attrVal]), d => d.Year, d => d[this.groupVal]);
+
+            genre_sales = d3.rollup(this.data,v => d3.mean(v, d =>  d[this.attrVal]), d => d.Year, d => d[this.groupVal]);
+            console.log(genre_sales)
           }else{
 
-             genre_sales = d3.rollup(this.dataset, v => d3.sum(v, d => d[this.attrVal]), d => d.Year, d => d[this.groupVal]);
+             genre_sales = d3.rollup(this.data, v => d3.sum(v, d => d[this.attrVal]), d => d.Year, d => d[this.groupVal]);
+            console.log(genre_sales)
           }
           let series_data = [];
            this.series_keys = [];
@@ -112,34 +152,24 @@ export default {
 
           this.series = series_const(series_data);
           console.log(this.series)
+
+          this.x =  d3.scaleUtc()
+              .domain(d3.extent(this.data, d => d.Year))
+              .range([this.margin.left, this.width - this.margin.right]);
+
+          this.y = d3.scaleLinear()
+              .domain([d3.min(this.series, d => d3.min(d, d => d[0])), d3.max(this.series, d => d3.max(d, d => d[1]))])
+              .range([this.height - this.margin.bottom, this.margin.top]);
+
+           this.color = d3.scaleOrdinal()
+              .domain(Object.keys(this.data[0]))
+              .range(d3.schemeCategory10);
           this.constrStream();
         },
 
       constrStream(){
         d3.select(".streamGraph").remove();
-        let margin = ({top: 0, right: 20, bottom: 30, left: 20});
-
-          this.x =  d3.scaleUtc()
-             .domain(d3.extent(this.dataset, d => d.Year))
-             .range([margin.left, this.width - margin.right]);
-        let y = d3.scaleLinear()
-            .domain([d3.min(this.series, d => d3.min(d, d => d[0])), d3.max(this.series, d => d3.max(d, d => d[1]))])
-            .range([this.height - margin.bottom, margin.top]);
-        let color = d3.scaleOrdinal()
-            .domain(Object.keys(this.dataset[0]))
-            .range(d3.schemeCategory10);
-         this.xAxis = (g,x) => g
-            .attr("transform", `translate(0,${this.height - margin.bottom})`)
-            .call(d3.axisBottom(x).ticks(this.width / 80).tickSizeOuter(0))
-            .call(g => g.select(".domain").remove())
-
-        this.area = (data,x) => d3.area()
-            .x(d => x(d.data.date))
-            .y0(d =>  y(d[0]))
-            .y1(d => y(d[1]))
-
-
-         this.svg = d3.select(".svg-container")
+        this.svg = d3.select(".svg-container")
             .append("svg")
             .attr("class","streamGraph")
             .style("overflow","visible")
@@ -153,15 +183,12 @@ export default {
             .attr("width",this.width)
             .attr("height",this.height);
 
-
-         this.Tooltip = this.svg
+        this.Tooltip = this.svg
             .append("text")
             .attr("x", 0)
             .attr("y", 20)
             .style("opacity", 0)
             .style("font-size", 17)
-
-
 
 
         this.areas = this.svg.append("g")
@@ -172,30 +199,16 @@ export default {
             .on("mousemove",this.moved)
             .on("mouseleave",this.leave)
             .on("click",this.clicked)
-            .attr("fill", ({key}) => color(key))
+            .attr("fill", ({key}) => this.color(key))
             .attr("class","area")
             .attr("clip-path","url(#clip)")
             .attr("d", this.area(this.series,this.x));
 
 
-
-
-
-         this.zoom = d3.zoom()
-            .scaleExtent([1, 32])
-            .extent([[margin.left, 0], [this.width - margin.right, this.height]])
-            .translateExtent([[margin.left, -Infinity], [this.width - margin.right, Infinity]])
-            .on("zoom", this.zoomed);
-
         this.svg.call(this.zoom)
 
          this.gx = this.svg.append("g")
             .call(this.xAxis, this.x);
-        //let keys = this.series_keys;
-
-
-
-
 
       },
       moved(event,d){

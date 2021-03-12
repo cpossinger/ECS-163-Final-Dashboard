@@ -28,6 +28,10 @@ export default {
       groupVal: {
         required: true
       },
+      setClicked: {
+          type: Function,
+          required: true
+      },
       selectedGroupsBar: {
         type: Object
       }
@@ -227,7 +231,7 @@ console.log("this.data: ",this.data);
         d3.selectAll(".area").style("opacity", 1).style("stroke", "none")
       },
       clicked(event,d){
-      this.$emit("clicked",d.key);
+      this.setClicked(d.key)
       },
 
       zoomed(event) {

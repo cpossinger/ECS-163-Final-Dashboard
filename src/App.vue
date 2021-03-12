@@ -64,7 +64,7 @@
           <v-row  no-gutters>
       <keep-alive>
         <transition name="component-fade" mode="out-in">
-<component :is="component" v-bind="currentProps" v-if="dataset" @clicked="setClickedStreamVal" />
+<component :is="component" v-bind="currentProps" v-if="dataset" @selectedGroupStream="setClickedStreamVal" />
 
         </transition>
       </keep-alive>
@@ -195,6 +195,7 @@ export default {
       return labels[s]
     },
     setClickedStreamVal(val){
+        console.log('setClicked called')
       this.selectedGroupStream = val;
     },
 
@@ -238,7 +239,8 @@ export default {
       width:'500',
       height:'150',
       attrVal:"Global_Sales",
-      groupVal:"Genre"
+      groupVal:"Genre",
+      setClicked: this.setClickedStreamVal
        }
       }
       else if(this.component === "BarChart"){
@@ -258,6 +260,9 @@ export default {
 
         return {
           dataset: this.dataset,
+          attrVal: this.attrVal,
+          groupVal: this.groupValStream,
+          selectedGroupStream: '',
           width: "500",
           height: "200"
         }
@@ -271,7 +276,8 @@ export default {
           groupValStream: this.groupValStream,
           selectedGroupStream: this.selectedGroupStream,
           selectedGroupsBar: this.selectedGroupsBar,
-          barChartFiltering: this.barChartFiltering
+          barChartFiltering: this.barChartFiltering,
+          setClickedStreamVal: this.setClickedStreamVal
         }
       }
     },

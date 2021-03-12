@@ -10,6 +10,7 @@
               :height='200'
               :attrVal="attrVal"
               :groupVal="groupValStream"
+              :setClicked='setClickedStreamVal'
               :selectedGroupsBar="selectedGroupsBar"
           />
         </v-col>
@@ -22,7 +23,8 @@
               :dataset='dataset'
               :attrVal="attrVal"
               :groupVal="groupValStream"
-              @clicked="clicked"
+              :selectedGroupStream='selectedGroupStream'
+              :selectedGroupsBar='selectedGroupsBar'
               width='800'
               height='600'
 
@@ -74,8 +76,8 @@ export default {
     barChartFiltering: {
       required: true
     },
-    clicked: {
-      required: true
+    setClickedStreamVal: {
+        required: true
     },
     selectedGroupsBar: {
       type: Object
@@ -92,13 +94,6 @@ export default {
         handler: function (val){
           console.log("groupValBar", val)
           this.groupValBar = val;
-        },
-        deep: true
-      },
-      clicked: {
-        handler: function (val){
-          console.log("clicked", val)
-          this.clicked = val;
         },
         deep: true
       },
@@ -134,7 +129,7 @@ export default {
   methods: {
     init() {
       console.log("main.vue selectedgroupsstream", this.selectedGroupsStream)
-    }
+    },
   }
 };
 </script>

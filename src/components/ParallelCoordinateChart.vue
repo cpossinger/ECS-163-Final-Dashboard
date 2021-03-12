@@ -23,7 +23,12 @@ export default {
     groupVal: {
       required: true
     },
-
+    selectedGroupStream: {
+        required: true
+    },
+    selectedGroupsBar: {
+        required: true
+    },
     width: {
       required: true
     },
@@ -45,9 +50,19 @@ export default {
     }
   },
   watch: {
-
+      selectedGroupStream() {
+          this.groupSelected = true
+          this.update()
+          this.groupSelected = false
+      },
+      selectedGroupsBar() {
+          this.groupSelected = true
+          this.update()
+          this.groupSelected = false
+      }
   },
   mounted() {
+      console.log('attempting to initialize')
     this.init()
   },
   computed: {
@@ -57,6 +72,9 @@ export default {
   },
   methods: {
     init() {
+        console.log('this.init called')
+        this.dataset = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
+        console.log(this.dataset)
       this.x = null
       this.y = d3.scalePoint()
       this.brush = d3.brushX()
@@ -66,14 +84,15 @@ export default {
       this.update()
     },
     update() {
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 9652b1e438fa2ae50bd00b22cd29ee00c91341fc
+    console.log('this.update called')
       // add columns manually
-      let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
-
+    let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
+     if (this.selectedGroupStream) {
+            this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
+      }
+      if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
+        this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib])) 
+    }
       this.dataset = Object.assign(this.dataset, {columns})
       this.keys = this.dataset.columns
       this.selections = new Map()
@@ -188,7 +207,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 /* Add your CSS here */
-<<<<<<< HEAD
 .tooltip {
     font-family: sans-serif;
     font-size: 16;
@@ -201,6 +219,3 @@ export default {
     color: #fff;
 }
 </style>
-=======
-</style>
->>>>>>> 9652b1e438fa2ae50bd00b22cd29ee00c91341fc

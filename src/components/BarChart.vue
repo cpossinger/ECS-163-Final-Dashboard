@@ -1,7 +1,7 @@
 <!-- Your HTML goes here -->
 <template>
   <div>
-    <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" :width="width" :height="height">
+    <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" width="100%">
       <g transform="translate(100, 0)" class='bar-vertical'></g>
 
       <g transform="translate(100, 500)" class='bar-horizontal'></g>
@@ -94,8 +94,8 @@ export default {
           )
       this.fixed_data = this.fixed_data.filter(d => d.data/this.total >= 0.01)
       console.log("fixed data: ",this.fixed_data);
-      this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, 500]).nice() // this.width
-      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, 500])//this.height
+      this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width]).nice() // this.width
+      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.width])//this.height
       this.renderBars()
     },
     renderBars() {
@@ -159,8 +159,8 @@ export default {
       this.renderAxes()
       let horizontal_label = d3.select("#horizontal-label")
       horizontal_label.text(this.attribY.replace("_", " "))
-                      .attr("x", buffer + 0.5 * 500) // this.width
-                      .attr("y", 500 + 0.5*buffer) // this.height
+                      .attr("x", buffer + 0.5 * this.width) // this.width
+                      .attr("y", this.height + 0.5*buffer) // this.height
                       .attr("text-anchor", "middle")
     }
   },

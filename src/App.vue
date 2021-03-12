@@ -126,7 +126,7 @@ export default {
 
   }),
   mounted() {
-    this.toggleDarkTheme();
+//    this.toggleDarkTheme();
   },
   methods: {
 

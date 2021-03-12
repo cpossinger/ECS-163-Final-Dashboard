@@ -27,6 +27,9 @@ export default {
       },
       groupVal: {
         required: true
+      },
+      selectedGroupsBar: {
+        type: Object
       }
     },
   watch: {
@@ -45,6 +48,13 @@ export default {
         this.init();
       },
       deep: true
+    },
+    selectedGroupsBar: {
+      handler: function (val) {
+        console.log("watch: selectedGroupsBar", val)
+        this.selectedGroupsBar = val
+        this.init()
+      }
     }
   },
     data: () =>  ({
@@ -91,8 +101,10 @@ export default {
 
     methods: {
         init() {
-          this.data = this.dataset.filter(obj => obj[this.groupVal] != 0);
-          this.data = this.dataset.filter(obj => obj[this.attrVal] != 0);
+          this.data = this.dataset.filter(obj => obj[this.groupVal] != 0 && obj[this.attrVal] != 0);
+          if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
+            this.data = this.data.filter(obj => this.selectedGroupsBar.values.includes(obj[this.selectedGroupsBar.attrib]))
+          }
 console.log("this.data: ",this.data);
           let genre_sales = null;
           if(this.attrVal.includes("Score") === true){

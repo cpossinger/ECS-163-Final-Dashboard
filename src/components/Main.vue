@@ -10,6 +10,7 @@
               :height='200'
               :attrVal="attrVal"
               :groupVal="groupValStream"
+              :selectedGroupsBar="selectedGroupsBar"
           />
         </v-col>
       </v-row>
@@ -21,7 +22,7 @@
               :dataset='dataset'
               :attrVal="attrVal"
               :groupVal="groupValStream"
-              :clicked="clicked"
+              @clicked="clicked"
               width='800'
               height='600'
 
@@ -34,8 +35,9 @@
               :dataset='dataset'
               :width='500'
               :height='500'
-              :attribX= 'attrVal'
-              :attribY='groupValBar'
+              :attribY= 'attrVal'
+              :attribX='groupValBar'
+              :streamGroup='groupValStream'
               :selectedGroupStream="selectedGroupStream"
               :setFilter="barChartFiltering"
           />
@@ -74,6 +76,9 @@ export default {
     },
     clicked: {
       required: true
+    },
+    selectedGroupsBar: {
+      type: Object
     }
   },
     watch: {
@@ -85,24 +90,28 @@ export default {
       },
       groupValBar: {
         handler: function (val){
+          console.log("groupValBar", val)
           this.groupValBar = val;
         },
         deep: true
       },
       clicked: {
         handler: function (val){
+          console.log("clicked", val)
           this.clicked = val;
         },
         deep: true
       },
       groupValStream: {
         handler: function (val){
+          console.log("groupValStream", val)
           this.groupValStream = val;
         },
         deep: true
       },
       selectedGroupStream: {
         handler: function (val){
+          console.log("selectedGroupStream", val)
           this.selectedGroupStream = val;
         },
         deep: true
@@ -119,9 +128,13 @@ export default {
     selectedGroup: null
 
   }),
-
+  mounted() {
+    console.log("main mounted", this.selectedGroupsStream)
+  },
   methods: {
-
+    init() {
+      console.log("main.vue selectedgroupsstream", this.selectedGroupsStream)
+    }
   }
 };
 </script>

@@ -117,10 +117,11 @@ export default {
       {value: 'JP_Sales', label: "Japan Sales"},
     ],
     groupValStream: "Genre",
-    groupValBar: "Genre",
+    groupValBar: "Platform",
     attrVal: "Global_Sales",
     path: "url(/data/start_menu.png)",
-    selectedGroupStream: "Sports"
+    selectedGroupStream: "Sports",
+    selectedGroupsBar: {attrib: "Platform", values: []}
 
 
   }),
@@ -131,6 +132,7 @@ export default {
 
     barChartFiltering(attribX, selected) {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
+      this.selectedGroupsBar = {attrib: attribX, values: selected}
     },
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
@@ -243,11 +245,13 @@ export default {
 
         return {
           dataset: this.dataset,
-          width:'7000',
-          height: '7000',
+          width:700,
+          height: 700,
           attribX: 'Genre',
           attribY: 'Total_Shipped',
-          setFilter: this.barChartFiltering
+          setFilter: this.barChartFiltering,
+          streamGroup: '',
+          selectedGroupStream: '' 
         }
       }
       else if(this.component === "ParallelCoordinateChart"){
@@ -259,13 +263,14 @@ export default {
         }
       }
       else if(this.component === "Main"){
-
+        console.log("rendermain", this.selectedGroupsBar)
         return {
           dataset: this.dataset,
           attrVal: this.attrVal,
           groupValBar: this.groupValBar,
           groupValStream: this.groupValStream,
           selectedGroupStream: this.selectedGroupStream,
+          selectedGroupsBar: this.selectedGroupsBar,
           barChartFiltering: this.barChartFiltering
         }
       }

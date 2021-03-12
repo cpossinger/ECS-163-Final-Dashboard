@@ -1,9 +1,12 @@
 <!-- Your HTML goes here -->
 <template>
-  <svg class='pc-container' :viewBox='viewBox'>
-    <g class='pc-lines'></g>
-    <g class='pc-axes'></g>
-  </svg>
+    <div>
+    <div class='tooltip'></div>
+    <svg class='pc-container' :viewBox='viewBox'>
+        <g class='pc-lines'></g>
+        <g class='pc-axes'></g>
+    </svg>
+  </div>
 </template>
 
 <script>
@@ -75,6 +78,7 @@ export default {
       this.update()
     },
     update() {
+
 
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
@@ -153,6 +157,30 @@ export default {
           .attr("d", d => this.line(d3.cross(this.keys, [d], (key, d) => [key, d[key]])))
           .append("title")
           .text(d => d.name);
+
+        d3.select('.pc-lines')
+            .selectAll('path')
+            .on('mouseover', function (e, d) {
+                d3.select('.tooltip')
+                .html(
+                    `<div>
+                    Name: ${d.Name}<br>
+                    </div>`)
+                .style('visibility', 'visible');
+                d3.select(this)
+                    .attr('stroke-width', 4)
+            })
+            .on('mousemove', function (e) {
+                d3.select('.tooltip')
+                .style('top', e.pageY - 50 + 'px')
+                .style('left', e.pageX + 10 + 'px');
+            })
+            .on('mouseout', function () {
+                d3.select('.tooltip')
+                    .html(``).style('visibility', 'hidden');
+                d3.select(this)
+                    .attr('stroke-width', 1.5)
+            });
     },
     axis_text(s) {
         console.log(s)
@@ -184,4 +212,15 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 /* Add your CSS here */
+.tooltip {
+    font-family: sans-serif;
+    font-size: 16;
+    position: absolute;
+    z-index: 10;
+    visibility: hidden;
+    padding: 10px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 4px;
+    color: #fff;
+}
 </style>

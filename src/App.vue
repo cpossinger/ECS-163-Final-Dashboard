@@ -11,7 +11,7 @@
       <v-select
           v-model="groupValStream"
           label="Select Steam Graph Grouping Attribute"
-          :items="groupValItems"
+          :items="groupValStreamItems"
           hide-details
           :menu-props="{top: true, offsetY: true,}"
       ></v-select>
@@ -27,7 +27,7 @@
       <v-select
           v-model="groupValBar"
           label="Select Bar Chart Group"
-          :items="groupValItems"
+          :items="groupValBarItems"
           item-text="label"
           item-value="value"
           hide-details
@@ -78,14 +78,28 @@
             :label="autoLabel"
             rounded
             filled
+            clearable
         >
         </v-autocomplete>
         </v-row>
 
+        <v-row v-if="['ParallelCoordinateChart','Main'].includes(component)" align="center" justify="center" no-gutters>
+          <v-range-slider
+              label="Select Year Range"
+             :value="yearRange"
+              max="2019"
+              min="1980"
+              vertical
+              thumb-label="always"
+          ></v-range-slider>
+
+        </v-row>
+
+
         <v-row  no-gutters>
           <keep-alive>
             <transition name="component-fade" mode="out-in">
-              <component :is="component" v-bind="currentProps" v-if="dataset" @selectedGroupStream="setClickedStreamVal" />
+              <component :is="component" v-bind="currentProps" v-if="dataset"  @selectedGroupStream="setClickedStreamVal" />
 
             </transition>
           </keep-alive>
@@ -122,8 +136,9 @@ export default {
   },
   data: () => ({
     component: "Start_Menu",
-    dataset: null,
-    groupValItems: ["Genre","Platform","Publisher","Developer"],
+    dataset: [],
+    groupValStreamItems: ["Genre","Platform","Publisher","Developer"],
+    groupValBarItems: ["Platform","Publisher","Developer"],
     attrValItems: [
       {value: 'Critic_Score', label: "Critic Score"},
       {value: 'User_Score', label: "User Score"},
@@ -141,13 +156,15 @@ export default {
     selectedGroupsBar: {attrib: "Platform", values: []},
     autoVal: "",
     autoLabel: "",
-    autoItems: []
+    autoItems: [],
+    yearRange: [1980,2019]
 
   }),
   watch: {
     groupValStream: {
       handler: function (){
         this.updateAuto();
+        this.updateBarItems();
       },
     },
     attrVal: {
@@ -168,10 +185,24 @@ export default {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
       this.selectedGroupsBar = {attrib: attribX, values: selected}
     },
+    updateBarItems(){
+      console.log("update bar items");
+      if(this.groupValStream === "Genre"){
+        this.groupValBarItems = ["Platform","Publisher","Developer"]
+      } else if(this.groupValStream === "Platform"){
+        this.groupValBarItems = ["Genre","Publisher","Developer"]
+      }else if(this.groupValStream === "Publisher"){
+        this.groupValBarItems = ["Genre","Platform","Developer"]
+      } else if(this.groupValStream === "Developer"){
+        this.groupValBarItems = ["Genre","Platform","Publisher"]
+      }
+
+    },
+
     updateAuto() {
       this.autoLabel = "Select" + " " + this.groupValStream;
-      let data = this.dataset.filter( obj => obj[this.attrVal] != 0);
-      this.autoItems = [...new Set(data.map(item => item[this.groupValStream]))];
+      let data = this.dataset.filter( obj => obj[this.attrVal] != 0)
+       this.autoItems =   [...new Set(data.map(item => item[this.groupValStream]))].filter(str => str != null);
     },
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
@@ -313,7 +344,8 @@ export default {
           selectedGroupsBar: this.selectedGroupsBar,
           barChartFiltering: this.barChartFiltering,
           setClickedStreamVal: this.setClickedStreamVal,
-          streamAutoVal: this.autoVal
+          autoVal: this.autoVal,
+          yearRange: this.yearRange
         }
       }
     },

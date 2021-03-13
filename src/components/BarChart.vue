@@ -38,7 +38,6 @@ export default {
       required: true
     },
     selectedGroupStream: {
-      type: String,
       required: true
     },
     setFilter: {

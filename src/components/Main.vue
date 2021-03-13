@@ -61,7 +61,7 @@ export default {
       required: true
     },
     autoVal: {
-
+      type: String
     },
     attrVal: {
       required: true
@@ -83,6 +83,9 @@ export default {
     },
     selectedGroupsBar: {
       type: Object
+    },
+    yearRange: {
+      required: true
     }
   },
   watch: {
@@ -91,9 +94,10 @@ export default {
         this.attrVal = val;
       },
     },
-    streamAutoVal: {
+    autoVal: {
       handler: function (val){
-        this.streamAutoVal = val;
+        this.autoVal = val;
+        console.log("main autoval: ",this.autoVal);
       },
     },
     groupValBar: {
@@ -109,6 +113,13 @@ export default {
     selectedGroupStream: {
       handler: function (val){
         this.selectedGroupStream = val;
+        console.log("main selectedGroupStream: ",this.selectedGroupStream)
+      },
+    },
+    yearRange: {
+      handler: function (val){
+        this.yearRange = val;
+        console.log("main yearRange: ",this.selectedGroupStream)
       },
     }
   },

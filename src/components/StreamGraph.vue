@@ -33,7 +33,7 @@ export default {
       type: Object
     },
     streamAutoVal: {
-      type: String
+
     }
   },
   watch: {
@@ -49,15 +49,15 @@ export default {
         console.log("watch: groupVal")
         this.groupVal = val;
         this.init();
-      },
+      }
+    },
       streamAutoVal: {
         handler: function (val) {
           this.streamAutoVal = val;
           console.log("stream autoval changed", this.streamAutoVal);
           this.autoSelectVal();
         },
-      }
-    },
+      },
     selectedGroupsBar: {
       handler: function (val) {
         console.log("watch: selectedGroupsBar", val)
@@ -65,8 +65,9 @@ export default {
         if(this.click === true){
           this.click = !this.click;
         }
-        this.init()
-      }
+        this.init();
+//        this.autoSelectVal();
+      },
     }
   },
   data: () =>  ({
@@ -82,7 +83,8 @@ export default {
     data: null,
     margin: null,
     color: null,
-    click: false
+    click: false,
+    clickedVal: null
   }),
   created() {
     this.margin = ({top: 0, right: 20, bottom: 30, left: 20});
@@ -215,7 +217,9 @@ export default {
       }
     },
     clicked(event,d){
+      console.log("clicked streamgraph");
       this.click = !this.click;
+      this.clickdedVal = d.key;
       this.setClicked(d.key)
     },
     autoSelectVal(){
@@ -223,11 +227,15 @@ export default {
       this.click = !this.click;
       let autoVal = this.streamAutoVal;
       this.Tooltip.style("opacity", 1);
+      this.Tooltip.text(this.streamAutoVal);
       d3.selectAll(".area").style("opacity", .2)
-      d3.selectAll("text")
-          .filter(function(){ return d3.select(this).text() == autoVal })
+       d3.selectAll(".area")
+          .filter(function(){ return d3.select(this)._groups[0][0].attributes[1].textContent === autoVal })
           .style("stroke", "black")
           .style("opacity", 1);
+      this.setClicked(this.streamAutoVal);
+
+
 
     },
     zoomed(event) {

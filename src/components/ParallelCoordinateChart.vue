@@ -1,10 +1,9 @@
-<!-- Your HTML goes here -->
 <template>
-    <div>
+  <div>
     <div class='tooltip'></div>
     <svg class='pc-container' :viewBox='viewBox'>
-        <g class='pc-lines'></g>
-        <g class='pc-axes'></g>
+      <g class='pc-lines'></g>
+      <g class='pc-axes'></g>
     </svg>
   </div>
 </template>
@@ -24,10 +23,10 @@ export default {
       required: true
     },
     selectedGroupStream: {
-        required: true
+      required: true
     },
     selectedGroupsBar: {
-        required: true
+      required: true
     },
     width: {
       required: true
@@ -50,19 +49,19 @@ export default {
     }
   },
   watch: {
-      selectedGroupStream() {
-          this.groupSelected = true
-          this.update()
-          this.groupSelected = false
-      },
-      selectedGroupsBar() {
-          this.groupSelected = true
-          this.update()
-          this.groupSelected = false
-      }
+    selectedGroupStream() {
+      this.groupSelected = true
+      this.update()
+      this.groupSelected = false
+    },
+    selectedGroupsBar() {
+      this.groupSelected = true
+      this.update()
+      this.groupSelected = false
+    }
   },
   mounted() {
-      console.log('attempting to initialize')
+    console.log('attempting to initialize')
     this.init()
   },
   computed: {
@@ -72,9 +71,9 @@ export default {
   },
   methods: {
     init() {
-        console.log('this.init called')
-        this.dataset = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
-        console.log(this.dataset)
+      console.log('this.init called')
+      this.dataset = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
+      console.log(this.dataset)
       this.x = null
       this.y = d3.scalePoint()
       this.brush = d3.brushX()
@@ -84,15 +83,15 @@ export default {
       this.update()
     },
     update() {
-    console.log('this.update called')
+      console.log('this.update called')
       // add columns manually
-    let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
-     if (this.selectedGroupStream) {
-            this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
+      let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
+      if (this.selectedGroupStream) {
+        this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
       }
       if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
-        this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib])) 
-    }
+        this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib]))
+      }
       this.dataset = Object.assign(this.dataset, {columns})
       this.keys = this.dataset.columns
       this.selections = new Map()
@@ -131,7 +130,6 @@ export default {
               .attr("x", this.margin.left)
               .attr("y", -6)
               .attr("text-anchor", "start")
-              .attr("fill", "black")
               .text(d => this.axis_text(d)))
           .call(g => g.selectAll("text")
               .clone(true).lower()
@@ -153,30 +151,29 @@ export default {
           .attr("d", d => this.line(d3.cross(this.keys, [d], (key, d) => [key, d[key]])))
           .append("title")
           .text(d => d.name);
-
-        d3.select('.pc-lines')
-            .selectAll('path')
-            .on('mouseover', function (e, d) {
-                d3.select('.tooltip')
+      d3.select('.pc-lines')
+          .selectAll('path')
+          .on('mouseover', function (e, d) {
+            d3.select('.tooltip')
                 .html(
                     `<div>
                     Name: ${d.Name}<br>
                     </div>`)
                 .style('visibility', 'visible');
-                d3.select(this)
-                    .attr('stroke-width', 4)
-            })
-            .on('mousemove', function (e) {
-                d3.select('.tooltip')
+            d3.select(this)
+                .attr('stroke-width', 4)
+          })
+          .on('mousemove', function (e) {
+            d3.select('.tooltip')
                 .style('top', e.pageY - 50 + 'px')
                 .style('left', e.pageX + 10 + 'px');
-            })
-            .on('mouseout', function () {
-                d3.select('.tooltip')
-                    .html(``).style('visibility', 'hidden');
-                d3.select(this)
-                    .attr('stroke-width', 1.5)
-            });
+          })
+          .on('mouseout', function () {
+            d3.select('.tooltip')
+                .html(``).style('visibility', 'hidden');
+            d3.select(this)
+                .attr('stroke-width', 1.5)
+          });
     },
     axis_text(s) {
       let labels = {Critic_Score:'Critic Score', User_Score:'User Score', Total_Shipped:'Total Shipped (m)',
@@ -208,14 +205,15 @@ export default {
 <style scoped>
 /* Add your CSS here */
 .tooltip {
-    font-family: sans-serif;
-    font-size: 16;
-    position: absolute;
-    z-index: 10;
-    visibility: hidden;
-    padding: 10px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 4px;
-    color: #fff;
+  font-family: sans-serif;
+  font-size: 16;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  padding: 10px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 4px;
+  color: currentColor;
+  fill: currentColor;
 }
 </style>

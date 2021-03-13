@@ -42,47 +42,67 @@
       <link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
     </head>
     <v-main>
-        <v-container fill-height fluid>
-          <v-row v-if="component === 'Start_Menu'" align="center" justify="center"  no-gutters >
+      <v-container fill-height fluid>
+        <v-row v-if="component === 'Start_Menu'" align="center" justify="center"  no-gutters >
           <h1 align="center" class="nes-text">Welcome to the VGS Dashboard Tutorial</h1>
         </v-row>
 
 
-      <v-row v-if="['StreamGraph','BarChart','ParallelCoordinateChart','End_Menu'].includes(component)" align="center" justify="center" no-gutters>
-      <div class="nes-container with-title is-centered is-dark">
-        <p v-if="component === 'StreamGraph'" class="title">Stream graph</p>
-        <p v-if="component === 'BarChart'" class="title">Bar Chart</p>
-        <p v-if="component === 'ParallelCoordinateChart'" class="title">Parallel Coordinate Chart</p>
-        <v-img src="/data/wizard.gif" max-height="115" max-width="100"></v-img>
-        <p class="nes-text" v-if="component === 'StreamGraph'">Stream Graph!</p>
-        <p class="nes-text" v-if="component === 'BarChart'">Bar Chart!</p>
-        <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">Parallel Coordinate Chart!</p>
-        <p class="nes-text" v-if="component === 'End_Menu'">Done!</p>
-      </div>
-      </v-row>
+        <v-row v-if="['StreamGraph','BarChart','ParallelCoordinateChart','End_Menu'].includes(component)" align="center" justify="center" no-gutters>
+          <div class="nes-container with-title is-centered is-dark">
+            <p v-if="component === 'StreamGraph'" class="title">Stream graph</p>
+            <p v-if="component === 'BarChart'" class="title">Bar Chart</p>
+            <p v-if="component === 'ParallelCoordinateChart'" class="title">Parallel Coordinate Chart</p>
+            <v-row>
+              <v-col>
+                <p class="nes-text" v-if="component === 'StreamGraph'">Welcome to the Stream Chart First select the sports genre from the select box and notice the spike in 2006 </p>
+                <p class="nes-text" v-if="component === 'BarChart'">Bar Chart!</p>
+                <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">Parallel Coordinate Chart!</p>
+                <p class="nes-text" v-if="component === 'End_Menu'">Done!</p>
+              </v-col>
+              <v-img src="/data/wizard.gif" max-height="115" max-width="100"></v-img>
+              <v-col>
 
-          <v-row  no-gutters>
-      <keep-alive>
-        <transition name="component-fade" mode="out-in">
-<component :is="component" v-bind="currentProps" v-if="dataset" @selectedGroupStream="setClickedStreamVal" />
+              </v-col>
+            </v-row>
 
-        </transition>
-      </keep-alive>
+
+          </div>
         </v-row>
 
-          <v-row v-if="component != 'Main'" align="center" justify="center" no-gutters>
+
+        <v-row v-if="['StreamGraph','Main'].includes(component)" align="center" justify="center" no-gutters>
+        <v-autocomplete
+            v-model="autoVal"
+            :items="autoItems"
+            :label="autoLabel"
+            rounded
+            filled
+        >
+        </v-autocomplete>
+        </v-row>
+
+        <v-row  no-gutters>
+          <keep-alive>
+            <transition name="component-fade" mode="out-in">
+              <component :is="component" v-bind="currentProps" v-if="dataset" @selectedGroupStream="setClickedStreamVal" />
+
+            </transition>
+          </keep-alive>
+        </v-row>
+
+        <v-row v-if="component != 'Main'" align="center" justify="center" no-gutters>
           <button id="back" type="button" v-if="['StreamGraph','BarChart','ParallelCoordinateChart','End_Menu'].includes(component)" class="nes-btn" @click="back">Back</button>
           <button id="skip" type="button" v-if="component === 'Start_Menu'" class="nes-btn" @click="skip">Skip</button>
           <button id="next" align="right" type="button" v-if="['Start_Menu','StreamGraph','BarChart','ParallelCoordinateChart'].includes(component)" class="nes-btn" @click="next">Next</button>
           <button id="finish" type="button" v-if="component === 'End_Menu'" class="nes-btn" @click="finish">Finish</button>
-      </v-row>
+        </v-row>
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-
 import Main from './components/Main.vue'
 import Start_Menu from './components/Start_Menu.vue'
 import End_Menu from "@/components/End_Menu";
@@ -90,10 +110,8 @@ import StreamGraph from "@/components/StreamGraph";
 import ParallelCoordinateChart from "@/components/ParallelCoordinateChart";
 import BarChart from "@/components/BarChart";
 import * as d3 from "d3";
-
 export default {
   name: 'App',
-
   components: {
     Main,
     Start_Menu,
@@ -102,7 +120,6 @@ export default {
     StreamGraph,
     ParallelCoordinateChart
   },
-
   data: () => ({
     component: "Start_Menu",
     dataset: null,
@@ -121,18 +138,40 @@ export default {
     attrVal: "Global_Sales",
     path: "url(/data/start_menu.png)",
     selectedGroupStream: "Sports",
-    selectedGroupsBar: {attrib: "Platform", values: []}
-
+    selectedGroupsBar: {attrib: "Platform", values: []},
+    autoVal: "",
+    autoLabel: "",
+    autoItems: []
 
   }),
+  watch: {
+    groupValStream: {
+      handler: function (){
+        this.updateAuto();
+      },
+    },
+    attrVal: {
+      handler: function (){
+        this.updateAuto();
+      },
+    },
+    dataset: {
+      handler: function (){
+        this.updateAuto();
+      },
+    }
+  },
   mounted() {
-//    this.toggleDarkTheme();
   },
   methods: {
-
     barChartFiltering(attribX, selected) {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
       this.selectedGroupsBar = {attrib: attribX, values: selected}
+    },
+    updateAuto() {
+      this.autoLabel = "Select" + " " + this.groupValStream;
+      let data = this.dataset.filter( obj => obj[this.attrVal] != 0);
+      this.autoItems = [...new Set(data.map(item => item[this.groupValStream]))];
     },
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
@@ -143,8 +182,8 @@ export default {
         this.component = "StreamGraph";
         this.path = "url(/data/dungeon_room1.jpg)";
       }else if(this.component === "StreamGraph"){
-      this.component = "BarChart";
-      this.path = "url(/data/dungeon_room2.png)";
+        this.component = "BarChart";
+        this.path = "url(/data/dungeon_room2.png)";
       }else if(this.component === "BarChart"){
         this.component = "ParallelCoordinateChart";
         this.path = "url(/data/dungeon_room3.png)";
@@ -168,7 +207,6 @@ export default {
         this.path = "url(/data/dungeon_room2.png)";
       }
     },
-
     skip() {
       this.component = "Main";
       let app = document.getElementById("app")
@@ -195,10 +233,9 @@ export default {
       return labels[s]
     },
     setClickedStreamVal(val){
-        console.log('setClicked called')
+      console.log('setClicked called')
       this.selectedGroupStream = val;
     },
-
   },
   created() {
     console.log("created");
@@ -227,7 +264,6 @@ export default {
         })
       })
     });
-
   },
   computed: {
     // eslint-disable-next-line vue/return-in-computed-property
@@ -235,16 +271,16 @@ export default {
       if(this.component === "StreamGraph"){
         console.log(true);
         return {
-      dataset: this.dataset,
-      width:'500',
-      height:'150',
-      attrVal:"Global_Sales",
-      groupVal:"Genre",
-      setClicked: this.setClickedStreamVal
-       }
+          dataset: this.dataset,
+          width:'500',
+          height:'150',
+          attrVal:"Global_Sales",
+          groupVal:"Genre",
+          setClicked: this.setClickedStreamVal,
+          streamAutoVal: this.autoVal
+        }
       }
       else if(this.component === "BarChart"){
-
         return {
           dataset: this.dataset,
           width:700,
@@ -253,11 +289,10 @@ export default {
           attribY: 'Total_Shipped',
           setFilter: this.barChartFiltering,
           streamGroup: '',
-          selectedGroupStream: '' 
+          selectedGroupStream: ''
         }
       }
       else if(this.component === "ParallelCoordinateChart"){
-
         return {
           dataset: this.dataset,
           attrVal: this.attrVal,
@@ -277,13 +312,13 @@ export default {
           selectedGroupStream: this.selectedGroupStream,
           selectedGroupsBar: this.selectedGroupsBar,
           barChartFiltering: this.barChartFiltering,
-          setClickedStreamVal: this.setClickedStreamVal
+          setClickedStreamVal: this.setClickedStreamVal,
+          streamAutoVal: this.autoVal
         }
       }
     },
   }
 }
-
 </script>
 
 <style>
@@ -304,7 +339,6 @@ export default {
 .row {
   display: block;
 }
-
 .component-fade-enter-active, .component-fade-leave-active {
   transition: opacity .3s ease;
 }
@@ -313,22 +347,11 @@ export default {
   opacity: 0;
 }
 
-.nes-text {
-  overflow: hidden; /* Ensures the content is not revealed until the animation */
-  white-space: nowrap; /* Keeps the content on a single line */
-  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
-  letter-spacing: .15em; /* Adjust as needed */
-  animation:
-      typing 3.5s steps(40, end)
+text {
+  fill: currentColor;
 }
 
 
-/* text animation */
-
-@keyframes typing{
-  from{width: 0;}
-  to{width: 100%;}
-}
 
 
 </style>

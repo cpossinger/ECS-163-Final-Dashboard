@@ -1,4 +1,3 @@
-<!-- Your HTML goes here -->
 <template>
   <div>
     <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" width="100%">
@@ -39,8 +38,8 @@ export default {
       required: true
     },
     selectedGroupStream: {
-     type: String,
-     required: true
+      type: String,
+      required: true
     },
     setFilter: {
       type: Function,
@@ -81,17 +80,16 @@ export default {
           return d[this.attribX]
         })
       }
-
       group.forEach(
-              value => {
-                let sum = 0;
-                for (let i = 0; i < value.length; i++) {
-                  sum += value[i][this.attribY]
-                }
-                this.fixed_data.push({bar: value[0][this.attribX], data:sum})
-                this.total += sum
-              }
-          )
+          value => {
+            let sum = 0;
+            for (let i = 0; i < value.length; i++) {
+              sum += value[i][this.attribY]
+            }
+            this.fixed_data.push({bar: value[0][this.attribX], data:sum})
+            this.total += sum
+          }
+      )
       this.fixed_data = this.fixed_data.filter(d => d.data/this.total >= 0.01)
       console.log("fixed data: ",this.fixed_data);
       this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width]).nice() // this.width
@@ -127,23 +125,23 @@ export default {
               let bar = d3.select(d.target).attr("data")
               let value = d3.select(d.target).attr("val")
               d3.select(".bar-container")
-                .append("text")
-                .attr("class", "bar-hover")
-                .attr("y", this.vertical(bar) + this.vertical.bandwidth()/2 + 4)
-                .attr("x", this.horizontal(value) + 4 + buffer)
-                .attr("font-size", "smaller")
-                .text(parseFloat(value).toFixed(2))
+                  .append("text")
+                  .attr("class", "bar-hover")
+                  .attr("y", this.vertical(bar) + this.vertical.bandwidth()/2 + 4)
+                  .attr("x", this.horizontal(value) + 4 + buffer)
+                  .attr("font-size", "smaller")
+                  .text(parseFloat(value).toFixed(2))
             })
             .on("mouseout", () => d3.selectAll(".bar-hover").remove())
             .attr("fill", "#CCC")
             .filter(() => sel)
             .attr("fill", "#377db6")
-       /* bars.append("text")
-            .attr("class", "label")
-            .attr("y", this.vertical(d.bar) + this.vertical.bandwidth()/2 + 4)
-            .attr("x", this.horizontal(d.data) + 4 + buffer)
-            .text(d.data.toFixed(2))
-      */
+        /* bars.append("text")
+             .attr("class", "label")
+             .attr("y", this.vertical(d.bar) + this.vertical.bandwidth()/2 + 4)
+             .attr("x", this.horizontal(d.data) + 4 + buffer)
+             .text(d.data.toFixed(2))
+       */
       }
     },
     renderAxes() {
@@ -159,9 +157,9 @@ export default {
       this.renderAxes()
       let horizontal_label = d3.select("#horizontal-label")
       horizontal_label.text(this.attribY.replace("_", " "))
-                      .attr("x", buffer + 0.5 * this.width) // this.width
-                      .attr("y", this.height + 0.5*buffer) // this.height
-                      .attr("text-anchor", "middle")
+          .attr("x", buffer + 0.5 * this.width) // this.width
+          .attr("y", this.height + 0.5*buffer) // this.height
+          .attr("text-anchor", "middle")
     }
   },
   watch: {

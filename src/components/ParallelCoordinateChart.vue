@@ -131,12 +131,6 @@ export default {
               .attr("y", -6)
               .attr("text-anchor", "start")
               .text(d => this.axis_text(d)))
-          .call(g => g.selectAll("text")
-              .clone(true).lower()
-              .attr("fill", "none")
-              .attr("stroke-width", 5)
-              .attr("stroke-linejoin", "round")
-              .attr("stroke", "white"))
           .call(this.brush)
     },
     render_lines() {

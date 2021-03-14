@@ -60,6 +60,7 @@ export default {
   computed: {
     viewBox() {
       return `0 0 625 600`;
+      //return `0 0 ${this.width} ${this.height}`;
     },
   },
   methods: {

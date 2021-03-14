@@ -1,37 +1,58 @@
 <template>
-  <v-main>
-    <v-row align-content-lg="center" no-gutters>
-      <v-col lg=true>
+  <v-container fill-height fluid>
+    <v-row>
+      <v-col lg="true">
+
+        <v-row>
+          <v-col>
+            <v-select
+                v-model="groupValStream"
+                label="Select Stream Graph Group "
+                :items="groupValStreamItems"
+                hide-details
+                :menu-props="{top: true, offsetY: true,}"
+                filled
+                rounded
+            ></v-select>
+          </v-col>
+          <v-col>
+          <v-autocomplete
+              v-model="autoVal"
+              :items="autoItems"
+              :label="autoLabel"
+              rounded
+              filled
+              clearable
+          >
+          </v-autocomplete>
+          </v-col>
+        </v-row>
+
         <StreamGraph
             class='stream-graph'
             v-if='dataset'
             :dataset='dataset'
             :width='500'
-            :height='200'
+            :height='150'
             :attrVal="attrVal"
             :groupVal="groupValStream"
             :setClicked='setClickedStreamVal'
             :selectedGroupsBar="selectedGroupsBar"
             :streamAutoVal="autoVal"
         />
-      </v-col>
-    </v-row>
-    <v-row align-content-lg="center" no-gutters>
-      <v-col lg=true align="center">
-        <ParallelCoordinateChart
-            class='pc-chart'
-            v-if='dataset'
-            :dataset='dataset'
-            :attrVal="attrVal"
-            :groupVal="groupValStream"
-            :selectedGroupStream='selectedGroupStream'
-            :selectedGroupsBar='selectedGroupsBar'
-            width='800'
-            height='600'
 
-        />
-      </v-col>
-      <v-col lg=true align="center">
+        <v-select
+            v-model="groupValBar"
+            label="Select Bar Chart Group"
+            :items="groupValBarItems"
+            item-text="label"
+            item-value="value"
+            hide-details
+            :menu-props="{top: true, offsetY: true}"
+            filled
+            rounded
+        ></v-select>
+
         <BarChart
             class='bar-chart'
             v-if='dataset'
@@ -43,10 +64,37 @@
             :streamGroup='groupValStream'
             :selectedGroupStream="selectedGroupStream"
             :setFilter="barChartFiltering"
-        />
+            />
       </v-col>
+<v-col>
+  <v-row>
+  <v-col cols="2">
+        <v-range-slider
+            :value="yearRange"
+            max="2019"
+            min="1980"
+            vertical
+            thumb-label="always"
+        ></v-range-slider>
+  </v-col>
+
+  <v-col lg="true">
+        <ParallelCoordinateChart
+            class='pc-chart'
+            v-if='dataset'
+            :dataset='dataset'
+            :attrVal="attrVal"
+            :groupVal="groupValStream"
+            :selectedGroupStream='selectedGroupStream'
+            :selectedGroupsBar='selectedGroupsBar'
+            width='250'
+            height='250'
+            />
+  </v-col>
+  </v-row>
+</v-col>
     </v-row>
-  </v-main>
+  </v-container>
 
 </template>
 
@@ -60,16 +108,7 @@ export default {
     dataset: {
       required: true
     },
-    autoVal: {
-      type: String
-    },
     attrVal: {
-      required: true
-    },
-    groupValBar: {
-      required: true
-    },
-    groupValStream: {
       required: true
     },
     selectedGroupStream: {
@@ -84,20 +123,22 @@ export default {
     selectedGroupsBar: {
       type: Object
     },
-    yearRange: {
-      required: true
-    }
   },
   watch: {
     attrVal: {
       handler: function (val){
         this.attrVal = val;
+        this.updateAuto();
+      },
+    },
+    dataset: {
+      handler: function (){
+        this.updateAuto();
       },
     },
     autoVal: {
       handler: function (val){
         this.autoVal = val;
-        console.log("main autoval: ",this.autoVal);
       },
     },
     groupValBar: {
@@ -108,6 +149,9 @@ export default {
     groupValStream: {
       handler: function (val){
         this.groupValStream = val;
+        this.updateAuto();
+        this.updateBarItems();
+
       },
     },
     selectedGroupStream: {
@@ -116,12 +160,6 @@ export default {
         console.log("main selectedGroupStream: ",this.selectedGroupStream)
       },
     },
-    yearRange: {
-      handler: function (val){
-        this.yearRange = val;
-        console.log("main yearRange: ",this.selectedGroupStream)
-      },
-    }
   },
   components: {
     StreamGraph,
@@ -129,24 +167,49 @@ export default {
     BarChart
   },
   data: () => ({
-    selectedGroup: null
+    selectedGroup: null,
+    yearRange: [2019,1980],
+    autoVal:  "",
+    autoLabel: "",
+    autoItems: [],
+    groupValStream: "Genre",
+    groupValBar: "Platform",
+    groupValStreamItems: ["Genre","Platform","Publisher","Developer"],
+    groupValBarItems: ["Platform","Publisher","Developer"],
+
   }),
   mounted() {
     console.log("main mounted", this.selectedGroupsStream)
+    this.updateAuto();
   },
   methods: {
     init() {
       console.log("main.vue selectedgroupsstream", this.selectedGroupsStream)
     },
+    updateAuto() {
+      console.log("main update auto");
+      this.autoLabel = "Select" + " " + this.groupValStream;
+      let data = this.dataset.filter( obj => obj[this.attrVal] != 0)
+      this.autoItems =   [...new Set(data.map(item => item[this.groupValStream]))].filter(str => str != null);
+    },
+    updateBarItems(){
+      console.log("update bar items");
+      if(this.groupValStream === "Genre"){
+        this.groupValBarItems = ["Platform","Publisher","Developer"]
+      } else if(this.groupValStream === "Platform"){
+        this.groupValBarItems = ["Genre","Publisher","Developer"]
+      }else if(this.groupValStream === "Publisher"){
+        this.groupValBarItems = ["Genre","Platform","Developer"]
+      } else if(this.groupValStream === "Developer"){
+        this.groupValBarItems = ["Genre","Platform","Publisher"]
+      }
+
+    },
+
   }
 };
 </script>
 
 <style>
-.stream-graph {
-  padding-top: 40px;
-  padding-left: 80px;
-  padding-right: 80px;
-  border-color: black;
-}
+
 </style>

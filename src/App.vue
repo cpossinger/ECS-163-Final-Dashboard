@@ -8,13 +8,7 @@
     >
       <v-app-bar-title>Video Games 1980-2019</v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-select
-          v-model="groupValStream"
-          label="Select Steam Graph Grouping Attribute"
-          :items="groupValStreamItems"
-          hide-details
-          :menu-props="{top: true, offsetY: true,}"
-      ></v-select>
+
       <v-select
           v-model="attrVal"
           label="Select Attribute"
@@ -24,15 +18,7 @@
           hide-details
           :menu-props="{top: true, offsetY: true}"
       ></v-select>
-      <v-select
-          v-model="groupValBar"
-          label="Select Bar Chart Group"
-          :items="groupValBarItems"
-          item-text="label"
-          item-value="value"
-          hide-details
-          :menu-props="{top: true, offsetY: true}"
-      ></v-select>
+
       <v-btn @click="toggleDarkTheme" text rounded>Toggle Dark Theme</v-btn>
 
 
@@ -71,11 +57,11 @@
         </v-row>
 
 
-        <v-row v-if="['StreamGraph','Main'].includes(component)" align="center" justify="center" no-gutters>
+        <v-row v-if="['StreamGraph'].includes(component)" align="center" justify="center" no-gutters>
         <v-autocomplete
-            v-model="autoVal"
-            :items="autoItems"
-            :label="autoLabel"
+            v-model="autoValStream"
+            :items="autoItemsStream"
+            :label="autoLabelStream"
             rounded
             filled
             clearable
@@ -83,10 +69,9 @@
         </v-autocomplete>
         </v-row>
 
-        <v-row v-if="['ParallelCoordinateChart','Main'].includes(component)" align="center" justify="center" no-gutters>
+        <v-row v-if="component === 'ParallelCoordinateChart'" align="center" justify="center" no-gutters>
           <v-range-slider
-              label="Select Year Range"
-             :value="yearRange"
+             :value="yearRangePC"
               max="2019"
               min="1980"
               vertical
@@ -96,7 +81,7 @@
         </v-row>
 
 
-        <v-row  no-gutters>
+        <v-row>
           <keep-alive>
             <transition name="component-fade" mode="out-in">
               <component :is="component" v-bind="currentProps" v-if="dataset"  @selectedGroupStream="setClickedStreamVal" />
@@ -137,8 +122,7 @@ export default {
   data: () => ({
     component: "Start_Menu",
     dataset: [],
-    groupValStreamItems: ["Genre","Platform","Publisher","Developer"],
-    groupValBarItems: ["Platform","Publisher","Developer"],
+
     attrValItems: [
       {value: 'Critic_Score', label: "Critic Score"},
       {value: 'User_Score', label: "User Score"},
@@ -148,35 +132,28 @@ export default {
       {value: 'PAL_Sales', label: "PAL Region Sales"},
       {value: 'JP_Sales', label: "Japan Sales"},
     ],
-    groupValStream: "Genre",
-    groupValBar: "Platform",
     attrVal: "Global_Sales",
     path: "url(/data/start_menu.png)",
     selectedGroupStream: "Sports",
     selectedGroupsBar: {attrib: "Platform", values: []},
-    autoVal: "",
-    autoLabel: "",
-    autoItems: [],
-    yearRange: [1980,2019]
+    autoValStream: "",
+    autoLabelStream: "Select Genre",
+    autoItemsStream: [],
+    yearRangePC: [1980,2019]
 
   }),
   watch: {
-    groupValStream: {
-      handler: function (){
-        this.updateAuto();
-        this.updateBarItems();
-      },
-    },
-    attrVal: {
-      handler: function (){
-        this.updateAuto();
-      },
-    },
     dataset: {
       handler: function (){
         this.updateAuto();
       },
+    },
+    component: {
+      handler: function (){
+        this.changeDisplay();
+      },
     }
+
   },
   mounted() {
   },
@@ -185,24 +162,20 @@ export default {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
       this.selectedGroupsBar = {attrib: attribX, values: selected}
     },
-    updateBarItems(){
-      console.log("update bar items");
-      if(this.groupValStream === "Genre"){
-        this.groupValBarItems = ["Platform","Publisher","Developer"]
-      } else if(this.groupValStream === "Platform"){
-        this.groupValBarItems = ["Genre","Publisher","Developer"]
-      }else if(this.groupValStream === "Publisher"){
-        this.groupValBarItems = ["Genre","Platform","Developer"]
-      } else if(this.groupValStream === "Developer"){
-        this.groupValBarItems = ["Genre","Platform","Publisher"]
+    changeDisplay(){
+      if(this.component === "StreamGraph" || this.component === "ParallelCoordinateChart" ||this.component === "Start_Menu" || this.component === "End_Menu" || this.component === "BarChart"){
+        document.getElementById("component-row").style.display = "block";
+      }else{
+        //document.getElementById("component-row").style.display = "flex";
       }
+
+
 
     },
 
     updateAuto() {
-      this.autoLabel = "Select" + " " + this.groupValStream;
-      let data = this.dataset.filter( obj => obj[this.attrVal] != 0)
-       this.autoItems =   [...new Set(data.map(item => item[this.groupValStream]))].filter(str => str != null);
+      let data = this.dataset.filter( obj => obj["Genre"] != 0)
+       this.autoItemsStream =   [...new Set(data.map(item => item[this.groupValStream]))].filter(str => str != null);
     },
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
@@ -242,15 +215,13 @@ export default {
       this.component = "Main";
       let app = document.getElementById("app")
       app.style.removeProperty("background")
-      let row = document.getElementsByClassName("row");
-      row.style.removeProperty("display")
+
     },
+
     finish(){
       this.component = "Main";
       let app = document.getElementById("app")
       app.style.removeProperty("background")
-      let row = document.getElementsByClassName("row");
-      row.style.removeProperty("display")
     },
     label(s) {
       let labels =
@@ -308,7 +279,7 @@ export default {
           attrVal:"Global_Sales",
           groupVal:"Genre",
           setClicked: this.setClickedStreamVal,
-          streamAutoVal: this.autoVal
+          streamAutoVal: this.autoValStream
         }
       }
       else if(this.component === "BarChart"){
@@ -338,14 +309,10 @@ export default {
         return {
           dataset: this.dataset,
           attrVal: this.attrVal,
-          groupValBar: this.groupValBar,
-          groupValStream: this.groupValStream,
           selectedGroupStream: this.selectedGroupStream,
           selectedGroupsBar: this.selectedGroupsBar,
           barChartFiltering: this.barChartFiltering,
           setClickedStreamVal: this.setClickedStreamVal,
-          autoVal: this.autoVal,
-          yearRange: this.yearRange
         }
       }
     },
@@ -360,16 +327,12 @@ export default {
   margin: -20px -50px;
   position:relative;
   top:10%;
-  left:40%;
 }
 .v-application {
   font-family: "Press Start 2P";
 }
 .v-application .title {
   font-family: "Press Start 2P" !important;
-}
-.row {
-  display: block;
 }
 .component-fade-enter-active, .component-fade-leave-active {
   transition: opacity .3s ease;
@@ -382,8 +345,9 @@ export default {
 text {
   fill: currentColor;
 }
-
-
+.v-slider--vertical {
+  min-height: 750px;
+}
 
 
 </style>

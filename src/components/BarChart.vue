@@ -1,11 +1,11 @@
 <template>
   <div>
-    <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" width="100%">
-      <g transform="translate(100, 0)" class='bar-vertical'></g>
+    <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" >
+      <g :transform="'translate(' + buffer + ', 0)'" class='bar-vertical'></g>
 
-      <g transform="translate(100, 500)" class='bar-horizontal'></g>
+      <g :transform="'translate(' + buffer + ',' + (width-buffer/2) + ')'" class='bar-horizontal'></g>
       <g class="bars"></g>
-      <text class="text" id="horizontal-label"> </text>
+      <text class="text" id="horizontal-label" > </text>
     </svg>
   </div>
 </template>
@@ -51,7 +51,8 @@ export default {
       horizontal: null,
       selection: [],
       fixed_data: [],
-      summmed_label: ""
+      summmed_label: "",
+      buffer: 100
     }
   },
   mounted() {
@@ -59,8 +60,7 @@ export default {
   },
   computed: {
     viewBox() {
-      return `0 0 625 600`;
-      //return `0 0 ${this.width} ${this.height}`;
+      return `0 0 ${this.width} ${this.height}`;
     },
   },
   methods: {
@@ -86,14 +86,33 @@ export default {
             for (let i = 0; i < value.length; i++) {
               sum += value[i][this.attribY]
             }
-            this.fixed_data.push({bar: value[0][this.attribX], data:sum})
+            let bar = value[0][this.attribX]
+            if (bar.length > 10) {
+              // Several of the producers and developers have names that are much too long
+              bar = bar.replace(" Computer Entertainment", "")
+                .replace(" Entertainment", "")
+                .replace(" Software, Inc.", "")
+                .replace("SCE San Diego Studio", "SCE Studios")
+                .replace(" Creations", "")
+                .replace(" Interactive", "")
+                .replace(" / Lexis Numerique", "")
+                .replace("EA Redwood Shores", "EA Redwood")
+                .replace(" Software", "")
+                .replace(" Productions", "")
+                .replace(" Ltd.", "") 
+                .replace("Developments", "Dev.")
+                  
+            }
+            this.fixed_data.push({bar: bar, data:sum})
             this.total += sum
           }
       )
       this.fixed_data = this.fixed_data.filter(d => d.data/this.total >= 0.01)
-      console.log("fixed data: ",this.fixed_data);
-      this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width]).nice() // this.width
-      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.width])//this.height
+        //.sort((a,b) => a.bar.localeCompare(b.bar))
+        .sort((a,b) => b.data - a.data)
+      console.log("bar chart fixed data: ",this.fixed_data);
+      this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width - buffer*2]).nice() 
+      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.height - buffer/2])
       this.renderBars()
     },
     renderBars() {
@@ -136,12 +155,6 @@ export default {
             .attr("fill", "#CCC")
             .filter(() => sel)
             .attr("fill", "#377db6")
-        /* bars.append("text")
-             .attr("class", "label")
-             .attr("y", this.vertical(d.bar) + this.vertical.bandwidth()/2 + 4)
-             .attr("x", this.horizontal(d.data) + 4 + buffer)
-             .text(d.data.toFixed(2))
-       */
       }
     },
     renderAxes() {
@@ -157,9 +170,10 @@ export default {
       this.renderAxes()
       let horizontal_label = d3.select("#horizontal-label")
       horizontal_label.text(this.attribY.replace("_", " "))
-          .attr("x", buffer + 0.5 * this.width) // this.width
-          .attr("y", this.height + 0.5*buffer) // this.height
+          .attr("x", 0.5 * this.width) // this.width
+          .attr("y", this.height) // this.height
           .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "bottom")
     }
   },
   watch: {

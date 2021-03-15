@@ -134,7 +134,7 @@ export default {
       console.log("bar chart fixed data: ",this.fixed_data);
       const initSelect = this.selection.length
       for (let i = 0; i < this.selection.length; i++) {
-        if (this.fixed_data.map(d => d[this.attribX]).includes(this.selection[i])){
+        if (this.fixed_data.map(d => d.bar).includes(this.selection[i])){
           this.selection.splice(i, 1)
           i--
         }

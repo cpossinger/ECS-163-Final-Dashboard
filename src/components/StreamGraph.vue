@@ -62,12 +62,16 @@ export default {
       handler: function (val) {
         console.log("watch: selectedGroupsBar", val)
         this.selectedGroupsBar = val
+        console.log("bar click", this.click)
+        /*
         if(this.click === true){
           this.click = !this.click;
         }
+         */
+        this.click = !this.click;
         this.init();
-//        this.autoSelectVal();
-          this.reselectVal();
+        this.autoSelectVal();
+          //this.reselectVal();
       },
     }
   },
@@ -231,29 +235,38 @@ export default {
     },
     autoSelectVal(){
       console.log("auto select");
-      console.log("auto selected val",this.selectedVal);
-      if(this.selectedVal === null){
+      if(this.selectedVal === null || this.selectedVal ===""){
+        this.click = !this.click;
+        console.log("auto selected val",this.selectedVal);
+        console.log("autoselect stream auto val", this.streamAutoVal)
+        console.log("auto click value", this.click);
         this.Tooltip.style("opacity", 0)
         d3.selectAll(".area").style("opacity", 1).style("stroke", "none")
-      }
-      this.click = !this.click;
+        this.setClicked(this.selectedVal);
+      }else{
+        console.log("autoselect stream auto val", this.streamAutoVal)
+        console.log("autoselect selected ", this.selectedVal)
 
-      console.log("auto click val", this.click);
-      let autoVal = this.streamAutoVal;
-      this.Tooltip.style("opacity", 1);
-      this.Tooltip.text(this.streamAutoVal);
-      d3.selectAll(".area").style("opacity", .2)
-       d3.selectAll(".area")
-          .filter(function(){ return d3.select(this)._groups[0][0].attributes[1].textContent === autoVal })
-          .style("stroke", "black")
-          .style("opacity", 1);
-      this.selectedVal = this.streamAutoVal;
-      this.setClicked(this.selectedVal);
+        this.click = !this.click;
+        console.log("auto click val", this.click);
+        let autoVal = this.streamAutoVal;
+        this.Tooltip.style("opacity", 1);
+        this.Tooltip.text(this.streamAutoVal);
+        d3.selectAll(".area").style("opacity", .2)
+        d3.selectAll(".area")
+            .filter(function(){ return d3.select(this)._groups[0][0].attributes[1].textContent === autoVal })
+            .style("stroke", "black")
+            .style("opacity", 1);
+        this.selectedVal = this.streamAutoVal;
+        this.setClicked(this.selectedVal);
+      }
+
+
 
     },
     reselectVal(){
-      console.log(this.selectedVal);
-      if(this.selectedVal != null){
+      console.log("reselect: ",this.selectedVal);
+      //if(this.selectedVal != null || this.selectedVal != ""){
 
       this.click = !this.click;
       let val = this.selectedVal;
@@ -265,7 +278,7 @@ export default {
           .style("stroke", "black")
           .style("opacity", 1);
       this.setClicked(this.selectedVal);
-      }
+      //}
 
 
 

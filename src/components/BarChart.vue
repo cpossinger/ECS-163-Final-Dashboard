@@ -43,6 +43,10 @@ export default {
     setFilter: {
       type: Function,
       required: true
+    },
+    yearRange: {
+      type: Array,
+      required:true
     }
   },
   data() {
@@ -69,9 +73,17 @@ export default {
       this.selectedGroupStream = data
     },
     renderData() {
+
       this.total = 0
       this.fixed_data = []
       let group = null
+     if(this.yearRange[0] <= this.yearRange[1]){
+      this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
+     }else{
+       this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+     }
+
+
       if (this.selectedGroupStream == "" || this.streamGroup == "" || this.selectedGroupStream == null || this.streamGroup == null) {
         group = d3.group(this.dataset, d => d[this.attribX])
       } else {
@@ -202,6 +214,9 @@ export default {
     },
     selectedGroupStream() {
       console.log("bar selectedGroupStream", this.selectedGroupStream)
+      this.init()
+    },
+    yearRange() {
       this.init()
     }
     // StreamGroup will in any healthy idea be associated with a change in the selectedGroupStream

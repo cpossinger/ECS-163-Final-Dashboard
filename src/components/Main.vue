@@ -23,6 +23,7 @@
               rounded
               filled
               clearable
+              @click:clear="resetAutoVal"
           >
           </v-autocomplete>
           </v-col>
@@ -53,28 +54,32 @@
             rounded
         ></v-select>
 
+
         <BarChart
             class='bar-chart'
             v-if='dataset'
             :dataset='dataset'
             :width='500'
-            :height='500'
+            :height='250'
             :attribY= 'attrVal'
             :attribX='groupValBar'
             :streamGroup='groupValStream'
             :selectedGroupStream="selectedGroupStream"
             :setFilter="barChartFiltering"
+            :yearRange="yearRange"
             />
       </v-col>
 <v-col>
   <v-row>
   <v-col cols="2">
         <v-range-slider
-            :value="yearRange"
+            v-model="initYearRange"
+            @end="setYearRange"
             max="2019"
             min="1980"
             vertical
             thumb-label="always"
+            ticks
         ></v-range-slider>
   </v-col>
 
@@ -89,6 +94,7 @@
             :selectedGroupsBar='selectedGroupsBar'
             width='250'
             height='250'
+            :yearRange="yearRange"
             />
   </v-col>
   </v-row>
@@ -111,18 +117,26 @@ export default {
     attrVal: {
       required: true
     },
+    /*
     selectedGroupStream: {
       required: true
     },
+   */
+
+    /*
     barChartFiltering: {
       required: true
     },
+    /*
     setClickedStreamVal: {
       required: true
     },
+     */
+    /*
     selectedGroupsBar: {
       type: Object
     },
+     */
   },
   watch: {
     attrVal: {
@@ -160,6 +174,7 @@ export default {
         console.log("main selectedGroupStream: ",this.selectedGroupStream)
       },
     },
+
   },
   components: {
     StreamGraph,
@@ -168,7 +183,8 @@ export default {
   },
   data: () => ({
     selectedGroup: null,
-    yearRange: [2019,1980],
+    initYearRange: [1980,2019],
+    yearRange: [1980,2019],
     autoVal:  "",
     autoLabel: "",
     autoItems: [],
@@ -176,6 +192,9 @@ export default {
     groupValBar: "Platform",
     groupValStreamItems: ["Genre","Platform","Publisher","Developer"],
     groupValBarItems: ["Platform","Publisher","Developer"],
+    selectedGroupStream: "",
+    selectedGroupsBar: {attrib: "Platform", values: []},
+
 
   }),
   mounted() {
@@ -185,6 +204,9 @@ export default {
   methods: {
     init() {
       console.log("main.vue selectedgroupsstream", this.selectedGroupsStream)
+    },
+    resetAutoVal(){
+     this.autoVal = "";
     },
     updateAuto() {
       console.log("main update auto");
@@ -205,6 +227,18 @@ export default {
       }
 
     },
+    setClickedStreamVal(val){
+      console.log('setClicked called')
+      this.selectedGroupStream = val;
+    },
+    barChartFiltering(attribX, selected) {
+      console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
+      this.selectedGroupsBar = {attrib: attribX, values: selected}
+    },
+    setYearRange(val){
+      this.yearRange = val;
+    }
+
 
   }
 };

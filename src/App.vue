@@ -30,8 +30,13 @@
     <v-main>
       <v-container fill-height fluid>
         <v-row v-if="component === 'Start_Menu'" align="center" justify="center"  no-gutters >
-          <h1 align="center" class="nes-text">Welcome to the VGS Dashboard Tutorial</h1>
+          <h1 align="center" class="nes-text">Welcome to the VGS Dashboard</h1>
+
         </v-row>
+        <v-row v-if="component === 'Start_Menu'" align="center" justify="center"  no-gutters >
+          <h2 align="center" class="nes-text">Click Next for Tutorial</h2>
+        </v-row>
+
 
 
         <v-row v-if="['StreamGraph','BarChart','ParallelCoordinateChart','End_Menu'].includes(component)" align="center" justify="center" no-gutters>
@@ -40,16 +45,14 @@
             <p v-if="component === 'BarChart'" class="title">Bar Chart</p>
             <p v-if="component === 'ParallelCoordinateChart'" class="title">Parallel Coordinate Chart</p>
             <v-row>
+                <v-img src="/data/wizard.gif" max-height="115" max-width="100"></v-img>
               <v-col>
-                <p class="nes-text" v-if="component === 'StreamGraph'">Welcome to the Stream Chart First select the sports genre from the select box and notice the spike in 2006 </p>
+                <p align="left" class="nes-text" v-if="component === 'StreamGraph'"></p>
                 <p class="nes-text" v-if="component === 'BarChart'">Bar Chart!</p>
                 <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">Parallel Coordinate Chart!</p>
                 <p class="nes-text" v-if="component === 'End_Menu'">Done!</p>
               </v-col>
-              <v-img src="/data/wizard.gif" max-height="115" max-width="100"></v-img>
-              <v-col>
 
-              </v-col>
             </v-row>
 
 
@@ -81,10 +84,14 @@
         </v-row>
 
 
-        <v-row>
+        <v-row id="component-row">
           <keep-alive>
             <transition name="component-fade" mode="out-in">
+              <!--
               <component :is="component" v-bind="currentProps" v-if="dataset"  @selectedGroupStream="setClickedStreamVal" />
+              -->
+
+              <component :is="component" v-bind="currentProps" v-if="dataset"  />
 
             </transition>
           </keep-alive>
@@ -134,8 +141,8 @@ export default {
     ],
     attrVal: "Global_Sales",
     path: "url(/data/start_menu.png)",
-    selectedGroupStream: "Sports",
-    selectedGroupsBar: {attrib: "Platform", values: []},
+    //selectedGroupStream: "Sports",
+    //selectedGroupsBar: {attrib: "Platform", values: []},
     autoValStream: "",
     autoLabelStream: "Select Genre",
     autoItemsStream: [],
@@ -158,15 +165,20 @@ export default {
   mounted() {
   },
   methods: {
+    /*
     barChartFiltering(attribX, selected) {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
       this.selectedGroupsBar = {attrib: attribX, values: selected}
     },
-    changeDisplay(){
+   */
+
+
+
+changeDisplay(){
       if(this.component === "StreamGraph" || this.component === "ParallelCoordinateChart" ||this.component === "Start_Menu" || this.component === "End_Menu" || this.component === "BarChart"){
         document.getElementById("component-row").style.display = "block";
       }else{
-        //document.getElementById("component-row").style.display = "flex";
+        document.getElementById("component-row").style.display = "flex";
       }
 
 
@@ -234,10 +246,13 @@ export default {
             JP_Sales: "Japan Sales"}
       return labels[s]
     },
+    /*
     setClickedStreamVal(val){
       console.log('setClicked called')
       this.selectedGroupStream = val;
     },
+
+     */
   },
   created() {
     console.log("created");
@@ -276,7 +291,7 @@ export default {
           dataset: this.dataset,
           width:'500',
           height:'150',
-          attrVal:"Global_Sales",
+          attrVal:"Total_Shipped",
           groupVal:"Genre",
           setClicked: this.setClickedStreamVal,
           streamAutoVal: this.autoValStream
@@ -285,22 +300,22 @@ export default {
       else if(this.component === "BarChart"){
         return {
           dataset: this.dataset,
-          width:700,
-          height: 700,
-          attribX: 'Genre',
+          width:"500",
+          height: "200",
+          attribX: 'Platform',
           attribY: 'Total_Shipped',
           setFilter: this.barChartFiltering,
-          streamGroup: '',
-          selectedGroupStream: ''
+          streamGroup: 'Genre',
+          selectedGroupStream: 'Sports'
         }
       }
       else if(this.component === "ParallelCoordinateChart"){
         return {
           dataset: this.dataset,
-          attrVal: this.attrVal,
-          groupVal: this.groupValStream,
-          selectedGroupStream: '',
-          width: "500",
+          attrVal: "Total_Shipped",
+          groupVal: "Genre",
+          selectedGroupStream: 'Sports',
+          width: "200",
           height: "200"
         }
       }
@@ -309,10 +324,10 @@ export default {
         return {
           dataset: this.dataset,
           attrVal: this.attrVal,
-          selectedGroupStream: this.selectedGroupStream,
-          selectedGroupsBar: this.selectedGroupsBar,
-          barChartFiltering: this.barChartFiltering,
-          setClickedStreamVal: this.setClickedStreamVal,
+          //selectedGroupStream: this.selectedGroupStream,
+          //selectedGroupsBar: this.selectedGroupsBar,
+          //barChartFiltering: this.barChartFiltering,
+          //setClickedStreamVal: this.setClickedStreamVal,
         }
       }
     },
@@ -348,6 +363,7 @@ text {
 .v-slider--vertical {
   min-height: 750px;
 }
-
-
+.v-slider__thumb-label {
+  font-size: 0.45em;
+}
 </style>

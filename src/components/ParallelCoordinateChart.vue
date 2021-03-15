@@ -33,6 +33,9 @@ export default {
     },
     height: {
       required: true
+    },
+    yearRange: {
+      required: true
     }
   },
   data() {
@@ -45,7 +48,7 @@ export default {
         bottom: 20,
         left: 20,
         right: 20,
-      }
+      },
     }
   },
   watch: {
@@ -58,6 +61,12 @@ export default {
       this.groupSelected = true
       this.update()
       this.groupSelected = false
+    },
+    yearRange() {
+      this.update();
+    },
+    attrVal(){
+      this.update();
     }
   },
   mounted() {
@@ -71,6 +80,7 @@ export default {
   },
   methods: {
     init() {
+      this.init_val = true;
       console.log('this.init called')
       this.dataset = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
       console.log(this.dataset)
@@ -84,14 +94,29 @@ export default {
     },
     update() {
       console.log('this.update called')
+
+      console.log(this.yearRange);
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
-      if (this.selectedGroupStream) {
+      console.log(this.attrVal);
+this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
+
+      console.log("PC data: ", this.dataset);
+
+          if (this.selectedGroupStream) {
         this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
       }
       if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
         this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib]))
       }
+
+      if(this.yearRange[0] <= this.yearRange[1]){
+        console.log(this.yearRange[0], "<=", this.yearRange[1]);
+        this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
+      }else {
+        this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+      }
+
       this.dataset = Object.assign(this.dataset, {columns})
       this.keys = this.dataset.columns
       this.selections = new Map()
@@ -131,6 +156,14 @@ export default {
               .attr("y", -6)
               .attr("text-anchor", "start")
               .text(d => this.axis_text(d)))
+          /*
+          .call(g => g.selectAll("text")
+              .clone(true).lower()
+              .attr("fill", "none")
+              .attr("stroke-width", 5)
+              .attr("stroke-linejoin", "round")
+              .attr("stroke", "black"))
+           */
           .call(this.brush)
     },
     render_lines() {
@@ -152,6 +185,8 @@ export default {
                 .html(
                     `<div>
                     Name: ${d.Name}<br>
+                    Platform: ${d.Platform}<br>
+                    Released: ${d.Year.getUTCFullYear()}
                     </div>`)
                 .style('visibility', 'visible');
             d3.select(this)
@@ -170,8 +205,8 @@ export default {
           });
     },
     axis_text(s) {
-      let labels = {Critic_Score:'Critic Score', User_Score:'User Score', Total_Shipped:'Total Shipped (m)',
-        Global_Sales:'Global Sales (m)'}
+      let labels = {Critic_Score:'Critic Score', User_Score:'User Score', Total_Shipped:'Total Shipped (m)', Global_Sales:'Global Sales (m)'}
+
       return labels[s]
     },
     // brushed function taken from brushable scatterplot located at https://observablehq.com/@d3/brushable-parallel-coordinates

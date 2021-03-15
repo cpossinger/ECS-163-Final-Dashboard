@@ -67,6 +67,7 @@ export default {
         }
         this.init();
 //        this.autoSelectVal();
+          this.reselectVal();
       },
     }
   },
@@ -84,7 +85,7 @@ export default {
     margin: null,
     color: null,
     click: false,
-    clickedVal: null
+    selectedVal: null
   }),
   created() {
     this.margin = ({top: 0, right: 20, bottom: 30, left: 20});
@@ -177,7 +178,7 @@ export default {
           .attr("x", 0)
           .attr("y", 20)
           .style("opacity", 0)
-          .style("font-size", 17)
+          .style("font-size", 10)
       this.areas = this.svg.append("g")
           .selectAll("path")
           .data(this.series)
@@ -218,9 +219,17 @@ export default {
     },
     clicked(event,d){
       console.log("clicked streamgraph");
-      this.click = !this.click;
-      this.clickdedVal = d.key;
-      this.setClicked(d.key)
+      if(this.click === true){
+        this.click = !this.click;
+        this.selectedVal = "";
+        this.setClicked(this.selectedVal);
+      }else{
+        this.click = !this.click;
+        this.selectedVal = d.key;
+        this.setClicked(this.selectedVal);
+      }
+
+
     },
     autoSelectVal(){
       console.log("auto select");
@@ -233,7 +242,21 @@ export default {
           .filter(function(){ return d3.select(this)._groups[0][0].attributes[1].textContent === autoVal })
           .style("stroke", "black")
           .style("opacity", 1);
-      this.setClicked(this.streamAutoVal);
+      this.selectedVal = this.streamAutoVal;
+      this.setClicked(this.selectedVal);
+
+    },
+    reselectVal(){
+      this.click = !this.click;
+      let val = this.selectedVal;
+      this.Tooltip.style("opacity", 1);
+      this.Tooltip.text(this.selectedVal);
+      d3.selectAll(".area").style("opacity", .2)
+      d3.selectAll(".area")
+          .filter(function(){ return d3.select(this)._groups[0][0].attributes[1].textContent === val })
+          .style("stroke", "black")
+          .style("opacity", 1);
+      this.setClicked(this.selectedVal);
 
 
 

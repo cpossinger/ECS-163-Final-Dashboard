@@ -152,7 +152,7 @@ export default {
           .each((d, i, nodes) => {
             // This is where the issue is.
             console.log("Issue", d, i, nodes, d3.select(nodes[i]), this.x.get(d))
-            d3.select(nodes[i]).call(d3.axisBottom(this.x.get(d)));
+            d3.select(nodes[i]).call(d3.axisBottom(this.x.get(d)).ticks(this.width/60));
           })
           .call(g => g.append("text")
               .attr("x", this.margin.left)

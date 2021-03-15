@@ -1,10 +1,12 @@
 <template>
   <div>
     <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" >
-      <g :transform="'translate(' + buffer + ', 0)'" class='bar-vertical'></g>
+      <g transform="translate(0,5)">
+        <g :transform="'translate(' + buffer + ', 0)'" class='bar-vertical'></g>
 
-      <g :transform="'translate(' + buffer + ',' + (height-buffer/2) + ')'" class='bar-horizontal'></g>
-      <g class="bars"></g>
+        <g :transform="'translate(' + buffer + ',' + (height-buffer/2) + ')'" class='bar-horizontal'></g>
+        <g class="bars"></g>
+      </g>
       <text class="text" id="horizontal-label" > </text>
     </svg>
   </div>
@@ -102,6 +104,9 @@ export default {
               sum += value[i][this.attribY]
             }
             let bar = value[0][this.attribX]
+            if (bar == null) {
+              return
+            }
             if (bar.length > 10) {
               // Several of the producers and developers have names that are much too long
               bar = bar.replace(" Computer Entertainment", "")
@@ -116,7 +121,8 @@ export default {
                 .replace(" Productions", "")
                 .replace(" Ltd.", "") 
                 .replace("Developments", "Dev.")
-                  
+                .replace(" Game Studios", "")
+                .replace(" Games", "")   
             }
             this.fixed_data.push({bar: bar, data:sum})
             this.total += sum
@@ -126,9 +132,20 @@ export default {
         //.sort((a,b) => a.bar.localeCompare(b.bar))
         .sort((a,b) => b.data - a.data)
       console.log("bar chart fixed data: ",this.fixed_data);
+      const initSelect = this.selection.length
+      for (let i = 0; i < this.selection.length; i++) {
+        if (this.fixed_data.map(d => d.bar).includes(this.selection[i])){
+          this.selection.splice(i, 1)
+          i--
+        }
+      }
       this.horizontal = d3.scaleLinear().domain([0, 1.1* d3.max(this.fixed_data, d=>d.data)]).range([0, this.width - buffer*2]).nice() 
-      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [0, this.height - buffer/2])
+      this.vertical = d3.scaleBand(this.fixed_data.map(d => d.bar), [5, this.height - buffer/2])
       this.renderBars()
+      if (initSelect != this.selection.length) {
+        // Need to update the other components with the knowledge to not filter with these columns
+        this.setFilter(this.attribX, this.selection) 
+      }
     },
     renderBars() {
       d3.select(".bars").selectAll("*").remove()
@@ -161,9 +178,9 @@ export default {
               d3.select(".bar-container")
                   .append("text")
                   .attr("class", "bar-hover")
-                  .attr("y", this.vertical(bar) + this.vertical.bandwidth()/2 + 4)
+                  .attr("y", this.vertical(bar) + this.vertical.bandwidth()/2 + 9)
                   .attr("x", this.horizontal(value) + 4 + buffer)
-                  .attr("font-size", "smaller")
+                  .attr("font-size", "x-small")
                   .text(parseFloat(value).toFixed(2))
             })
             .on("mouseout", () => d3.selectAll(".bar-hover").remove())
@@ -175,7 +192,7 @@ export default {
     renderAxes() {
       let vert = d3.axisLeft(this.vertical).tickSize(0)
       d3.select(".bar-vertical").call(vert)
-      let hori = d3.axisBottom(this.horizontal)
+      let hori = d3.axisBottom(this.horizontal).ticks((this.width - 2*buffer)/50)
       d3.select(".bar-horizontal").call(hori)
     },
     init() {
@@ -196,12 +213,7 @@ export default {
       // Chart data was updated by main
       // Must check that every column in selection is still in the dataset, or remove it otherwise.
       console.log("bar data changed")
-      for (let i = 0; i < this.selection.length; i++) {
-        if (this.data.map(d => d[this.attribX]).includes(this.selection[i])){
-          this.selection.splice(i, 1)
-          i--
-        }
-      }
+      
       this.init()
     },
     attribX() {

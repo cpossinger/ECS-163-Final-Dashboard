@@ -54,7 +54,7 @@ export default {
         handler: function (val) {
           this.streamAutoVal = val;
           console.log("stream autoval changed", this.streamAutoVal);
-          console.log(this.click);
+          this.selectedVal = this.streamAutoVal;
           this.autoSelectVal();
         },
       },
@@ -220,11 +220,9 @@ export default {
     clicked(event,d){
       console.log("clicked streamgraph");
       if(this.click === true){
-        this.click = !this.click;
         this.selectedVal = "";
         this.setClicked(this.selectedVal);
       }else{
-        this.click = !this.click;
         this.selectedVal = d.key;
         this.setClicked(this.selectedVal);
       }
@@ -233,8 +231,14 @@ export default {
     },
     autoSelectVal(){
       console.log("auto select");
-
+      console.log("auto selected val",this.selectedVal);
+      if(this.selectedVal === null){
+        this.Tooltip.style("opacity", 0)
+        d3.selectAll(".area").style("opacity", 1).style("stroke", "none")
+      }
       this.click = !this.click;
+
+      console.log("auto click val", this.click);
       let autoVal = this.streamAutoVal;
       this.Tooltip.style("opacity", 1);
       this.Tooltip.text(this.streamAutoVal);

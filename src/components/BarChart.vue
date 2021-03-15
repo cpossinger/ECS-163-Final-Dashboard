@@ -3,7 +3,7 @@
     <svg class="bar-container"  id="barchart" :viewBox='viewBox' v-on:clicked="processStreamClick" >
       <g :transform="'translate(' + buffer + ', 0)'" class='bar-vertical'></g>
 
-      <g :transform="'translate(' + buffer + ',' + (width-buffer/2) + ')'" class='bar-horizontal'></g>
+      <g :transform="'translate(' + buffer + ',' + (height-buffer/2) + ')'" class='bar-horizontal'></g>
       <g class="bars"></g>
       <text class="text" id="horizontal-label" > </text>
     </svg>
@@ -77,11 +77,14 @@ export default {
       this.total = 0
       this.fixed_data = []
       let group = null
-     if(this.yearRange[0] <= this.yearRange[1]){
-      this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
-     }else{
-       this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
-     }
+      console.log("Bar Chart Year Range", this.yearRange)
+      if (this.yearRange != null) {
+        if(this.yearRange[0] <= this.yearRange[1]){
+          this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
+        }else{
+          this.dataset = this.dataset.filter(d => d[this.attribX] != 0 && d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+        }
+      }
 
 
       if (this.selectedGroupStream == "" || this.streamGroup == "" || this.selectedGroupStream == null || this.streamGroup == null) {

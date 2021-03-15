@@ -95,7 +95,7 @@ export default {
     update() {
       console.log('this.update called')
 
-      console.log(this.yearRange);
+      console.log("PC year range", this.yearRange);
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
       console.log(this.attrVal);
@@ -103,18 +103,19 @@ this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
 
       console.log("PC data: ", this.dataset);
 
-          if (this.selectedGroupStream) {
+      if (this.selectedGroupStream) {
         this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
       }
       if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
         this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib]))
       }
-
-      if(this.yearRange[0] <= this.yearRange[1]){
-        console.log(this.yearRange[0], "<=", this.yearRange[1]);
-        this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
-      }else {
-        this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+      if (this.yearRange != null) {
+        if(this.yearRange[0] <= this.yearRange[1]){
+          console.log(this.yearRange[0], "<=", this.yearRange[1]);
+          this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
+        }else {
+          this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+        }
       }
 
       this.dataset = Object.assign(this.dataset, {columns})
@@ -142,6 +143,7 @@ this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
       }
     },
     render_axes() {
+      d3.select(".pc-axes").selectAll("*").remove()
       d3.select('.pc-axes')
           .selectAll('g')
           .data(this.keys)
@@ -149,6 +151,7 @@ this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
           .attr("transform", d => `translate(0,${this.y(d)})`)
           .each((d, i, nodes) => {
             // This is where the issue is.
+            console.log("Issue", d, i, nodes, d3.select(nodes[i]), this.x.get(d))
             d3.select(nodes[i]).call(d3.axisBottom(this.x.get(d)));
           })
           .call(g => g.append("text")

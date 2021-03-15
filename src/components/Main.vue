@@ -230,6 +230,7 @@ export default {
     setClickedStreamVal(val){
       console.log('setClicked called')
       this.selectedGroupStream = val;
+      this.autoVal = val;
     },
     barChartFiltering(attribX, selected) {
       console.log("The bar chart said to filter the data on column", attribX, "with values", selected)

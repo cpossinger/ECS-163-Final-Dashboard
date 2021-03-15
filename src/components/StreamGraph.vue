@@ -33,8 +33,7 @@ export default {
       type: Object
     },
     streamAutoVal: {
-
-    }
+    },
   },
   watch: {
     attrVal: {
@@ -55,6 +54,7 @@ export default {
         handler: function (val) {
           this.streamAutoVal = val;
           console.log("stream autoval changed", this.streamAutoVal);
+          console.log(this.click);
           this.autoSelectVal();
         },
       },
@@ -233,6 +233,7 @@ export default {
     },
     autoSelectVal(){
       console.log("auto select");
+
       this.click = !this.click;
       let autoVal = this.streamAutoVal;
       this.Tooltip.style("opacity", 1);
@@ -247,6 +248,9 @@ export default {
 
     },
     reselectVal(){
+      console.log(this.selectedVal);
+      if(this.selectedVal != null){
+
       this.click = !this.click;
       let val = this.selectedVal;
       this.Tooltip.style("opacity", 1);
@@ -257,6 +261,7 @@ export default {
           .style("stroke", "black")
           .style("opacity", 1);
       this.setClicked(this.selectedVal);
+      }
 
 
 

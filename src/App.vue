@@ -41,16 +41,36 @@
 
         <v-row v-if="['StreamGraph','BarChart','ParallelCoordinateChart','End_Menu'].includes(component)" align="center" justify="center" no-gutters>
           <div class="nes-container with-title is-centered is-dark">
-            <p v-if="component === 'StreamGraph'" class="title">Stream graph</p>
+            <p v-if="component === 'StreamGraph'" class="title">Stream Graph</p>
             <p v-if="component === 'BarChart'" class="title">Bar Chart</p>
             <p v-if="component === 'ParallelCoordinateChart'" class="title">Parallel Coordinate Chart</p>
             <v-row>
+              <v-col cols="1">
                 <v-img src="/data/wizard.gif" max-height="115" max-width="100"></v-img>
+              </v-col>
               <v-col>
-                <p align="left" class="nes-text" v-if="component === 'StreamGraph'"></p>
-                <p class="nes-text" v-if="component === 'BarChart'">Bar Chart!</p>
-                <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">Parallel Coordinate Chart!</p>
-                <p class="nes-text" v-if="component === 'End_Menu'">Done!</p>
+                <p align="left" class="nes-text" v-if="component === 'StreamGraph'">
+                  Welcome to the VGS Dashboard! I'll be your guide on this quest to find the video game case that holds the key to the dungeon exit.
+                  Our first task is to analyze this stream graph that shows the total units shipped of video games that were released between 1980 and 2019 grouped by their genre. I the all-knowing wizard know that
+                  we need to look for sports games, in the select box search for "Sports". Notice the spike at around 2006, I wonder if the key is in that direction.
+                  *thud* Woah did you hear that? I think the door to the next room opened up,
+                  click "Next" to go to the next room.
+                </p>
+                <p class="nes-text" v-if="component === 'BarChart'">
+                  Ah there's nothing like new scenery right? It seems this next task has to do with this bar chart that displays the platform of sports games based on their total units shipped.
+                  Also notice the range slider that includes games that were released in certain years. We know from the stream graph that there was a spike in 2006. Move the slider so that both markers are on
+                  2006. Expelliarmus! It seems that the Wii had games that had a lot of units shipped in their lifetimes. We're close select the Wii bar to open the door to the next room.
+                </p>
+                <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">
+                  We've made it to the final room of the dungeon and we've found the game! I think it's pretty obvious that the only game on the parallel coordinate chart
+                  where each line represents a game has the key. Hover over the line at just the right spot to see the game. This line goes through different axes to represent different values, for example
+                  most users and critics gave this game a high rating of 8 out of 10. This result isn't surprising if you've ever owned a Wii, initially every Wii shipped with a copy of Wii Sports and as a result it became
+                  one of the most well known sports games. Our quest has come to an end take the key out of the Wii Sports sleeve and I'll meet you outside!
+                </p>
+                <p class="nes-text" v-if="component === 'End_Menu'">
+                  *pft* *pft* sorry some confetti got in my mouth. Thanks for coming along on this quest with me, now it's time for you to go on your own quest.
+                  Have fun, there are endless lands to discover out there, until next time! Wizard out!
+                </p>
               </v-col>
 
             </v-row>
@@ -72,27 +92,36 @@
         </v-autocomplete>
         </v-row>
 
-        <v-row v-if="component === 'ParallelCoordinateChart'" align="center" justify="center" no-gutters>
-          <v-range-slider
-             :value="yearRangePC"
-              max="2019"
-              min="1980"
-              vertical
-              thumb-label="always"
-          ></v-range-slider>
-
+        <v-row v-if="['ParallelCoordinateChart','BarChart'].includes(component)">
+          <v-container fill-height fluid>
+            <v-row >
+              <v-col lg="true" cols="2" >
+                <v-range-slider
+                    v-model="initYearRangePC"
+                    @end="setYearRangePC"
+                    max="2019"
+                    min="1980"
+                    vertical
+                    thumb-label="always"
+                    ticks
+                ></v-range-slider>
+              </v-col>
+              <v-col lg="true" align="center"  >
+                <keep-alive>
+                  <transition name="component-fade" mode="out-in">
+                    <component :is="component" v-bind="currentProps" v-if="dataset"  />
+                  </transition>
+                </keep-alive>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-row>
 
 
-        <v-row id="component-row">
+        <v-row style="display: block" v-if="['Main','StreamGraph'].includes(component)" id="component-row">
           <keep-alive>
             <transition name="component-fade" mode="out-in">
-              <!--
-              <component :is="component" v-bind="currentProps" v-if="dataset"  @selectedGroupStream="setClickedStreamVal" />
-              -->
-
               <component :is="component" v-bind="currentProps" v-if="dataset"  />
-
             </transition>
           </keep-alive>
         </v-row>
@@ -129,7 +158,7 @@ export default {
   data: () => ({
     component: "Start_Menu",
     dataset: [],
-
+    groupValStream: "Genre",
     attrValItems: [
       {value: 'Critic_Score', label: "Critic Score"},
       {value: 'User_Score', label: "User Score"},
@@ -146,7 +175,8 @@ export default {
     autoValStream: "",
     autoLabelStream: "Select Genre",
     autoItemsStream: [],
-    yearRangePC: [1980,2019]
+    yearRangePC: [1980,2019],
+    initYearRangePC: [1980,2019]
 
   }),
   watch: {
@@ -155,11 +185,11 @@ export default {
         this.updateAuto();
       },
     },
-    component: {
+    groupValStream: {
       handler: function (){
-        this.changeDisplay();
+        this.updateAuto();
       },
-    }
+    },
 
   },
   mounted() {
@@ -174,20 +204,18 @@ export default {
 
 
 
-changeDisplay(){
-      if(this.component === "StreamGraph" || this.component === "ParallelCoordinateChart" ||this.component === "Start_Menu" || this.component === "End_Menu" || this.component === "BarChart"){
-        document.getElementById("component-row").style.display = "block";
-      }else{
-        document.getElementById("component-row").style.display = "flex";
-      }
 
-
-
-    },
 
     updateAuto() {
-      let data = this.dataset.filter( obj => obj["Genre"] != 0)
+      let data = this.dataset.filter( obj => obj[this.groupValStream] != 0)
        this.autoItemsStream =   [...new Set(data.map(item => item[this.groupValStream]))].filter(str => str != null);
+    },
+    setYearRangePC(val){
+  this.yearRangePC = val;
+    },
+    barChartFiltering(attribX, selected) {
+      console.log("The bar chart said to filter the data on column", attribX, "with values", selected)
+      this.selectedGroupsBar = {attrib: attribX, values: selected}
     },
     toggleDarkTheme() {
       this.$vuetify.theme.themes.dark.anchor = "#41B883"
@@ -205,6 +233,7 @@ changeDisplay(){
         this.path = "url(/data/dungeon_room3.png)";
       } else{
         this.component = "End_Menu";
+        this.$confetti.start();
         this.path = "url(/data/end_menu.jpg)";
       }
     },
@@ -212,6 +241,7 @@ changeDisplay(){
       if(this.component === "End_Menu"){
         this.component = "ParallelCoordinateChart";
         this.path = "url(/data/dungeon_room3.png)";
+        this.$confetti.stop();
       }else if(this.component === "StreamGraph"){
         this.component = "Start_Menu";
         this.path = "url(/data/start_menu.png)"
@@ -232,6 +262,7 @@ changeDisplay(){
 
     finish(){
       this.component = "Main";
+      this.$confetti.stop();
       let app = document.getElementById("app")
       app.style.removeProperty("background")
     },
@@ -290,7 +321,7 @@ changeDisplay(){
         return {
           dataset: this.dataset,
           width:'500',
-          height:'150',
+          height:'125',
           attrVal:"Total_Shipped",
           groupVal:"Genre",
           setClicked: this.setClickedStreamVal,
@@ -300,13 +331,14 @@ changeDisplay(){
       else if(this.component === "BarChart"){
         return {
           dataset: this.dataset,
-          width:"500",
-          height: "200",
+          width:"600",
+          height: "225",
           attribX: 'Platform',
           attribY: 'Total_Shipped',
           setFilter: this.barChartFiltering,
           streamGroup: 'Genre',
-          selectedGroupStream: 'Sports'
+          selectedGroupStream: 'Sports',
+          yearRange: this.yearRangePC
         }
       }
       else if(this.component === "ParallelCoordinateChart"){
@@ -315,8 +347,10 @@ changeDisplay(){
           attrVal: "Total_Shipped",
           groupVal: "Genre",
           selectedGroupStream: 'Sports',
-          width: "200",
-          height: "200"
+          selectedGroupsBar: {attrib: "Platform", values: ["Wii"]},
+          width: "500",
+          height: "175",
+          yearRange: this.yearRangePC
         }
       }
       else if(this.component === "Main"){
@@ -361,8 +395,9 @@ text {
   fill: currentColor;
 }
 .v-slider--vertical {
-  min-height: 750px;
+  min-height: 420px;
 }
+
 .v-slider__thumb-label {
   font-size: 0.45em;
 }

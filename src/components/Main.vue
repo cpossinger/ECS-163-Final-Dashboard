@@ -56,11 +56,11 @@
 
 
         <BarChart
-            class='bar-chart'
+            class="pa-md-4 mx-lg-auto"
             v-if='dataset'
             :dataset='dataset'
             :width='500'
-            :height='250'
+            :height='200'
             :attribY= 'attrVal'
             :attribX='groupValBar'
             :streamGroup='groupValStream'
@@ -244,6 +244,6 @@ export default {
 };
 </script>
 
-<style>
+<style >
 
 </style>

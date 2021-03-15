@@ -173,7 +173,7 @@ export default {
       }
     },
     renderAxes() {
-      let vert = d3.axisLeft(this.vertical)
+      let vert = d3.axisLeft(this.vertical).tickSize(0)
       d3.select(".bar-vertical").call(vert)
       let hori = d3.axisBottom(this.horizontal)
       d3.select(".bar-horizontal").call(hori)

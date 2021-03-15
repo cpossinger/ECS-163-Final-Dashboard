@@ -52,24 +52,24 @@
                 <p align="left" class="nes-text" v-if="component === 'StreamGraph'">
                   Welcome to the VGS Dashboard! I'll be your guide on this quest to find the video game case that holds the key to the dungeon exit.
                   Our first task is to analyze this stream graph that shows the total units shipped of video games that were released between 1980 and 2019 grouped by their genre. I the all-knowing wizard know that
-                  we need to look for sports games, in the select box search for "Sports". Notice the spike at around 2006, I wonder if the key is in that direction.
-                  *thud* Woah did you hear that? I think the door to the next room opened up,
-                  click "Next" to go to the next room.
+                  we need to look for sports games. In the select box search for "Sports". Notice the spike at around 2006, I wonder if the key is in that direction?
+                  *thud* Woah did you hear that? I think the door to the next room opened up.
+                  Click "Next" to go to the next room.
                 </p>
                 <p class="nes-text" v-if="component === 'BarChart'">
-                  Ah there's nothing like new scenery right? It seems this next task has to do with this bar chart that displays the platform of sports games based on their total units shipped.
-                  Also notice the range slider that includes games that were released in certain years. We know from the stream graph that there was a spike in 2006. Move the slider so that both markers are on
-                  2006. Expelliarmus! It seems that the Wii had games that had a lot of units shipped in their lifetimes. We're close select the Wii bar to open the door to the next room.
+                  Ah. There's nothing like new scenery right? It seems this next task has to do with this bar chart that displays the platform of sports games based on their total units shipped.
+                  Notice the range slider that includes games that were released in certain years. We know from the stream graph that there was a spike in 2006. Move the slider so that both markers are on
+                  2006. Expelliarmus! It seems that the Wii had games that had a lot of units shipped in their lifetimes. We're close! Click on the Wii bar to open the door to the next room.
                 </p>
                 <p class="nes-text" v-if="component === 'ParallelCoordinateChart'">
-                  We've made it to the final room of the dungeon and we've found the game! I think it's pretty obvious that the only game on the parallel coordinate chart
-                  where each line represents a game has the key. Hover over the line at just the right spot to see the game. This line goes through different axes to represent different values, for example
-                  most users and critics gave this game a high rating of 8 out of 10. This result isn't surprising if you've ever owned a Wii, initially every Wii shipped with a copy of Wii Sports and as a result it became
-                  one of the most well known sports games. Our quest has come to an end take the key out of the Wii Sports sleeve and I'll meet you outside!
+                  We've made it to the final room of the dungeon! I see it! It's the game with 80 million copies!
+                  Hover over the line to unveil the name of the game. This line goes through different axes to represent different values, for example
+                  most users and critics gave this game a high rating of 8 out of 10. This result isn't surprising if you've ever owned a Wii. Initially every Wii shipped with a copy of Wii Sports and as a result it became
+                  one of the most well known sports games. Our quest has come to an end. Take the key out of the Wii Sports sleeve and I'll meet you outside!
                 </p>
                 <p class="nes-text" v-if="component === 'End_Menu'">
-                  *pft* *pft* sorry some confetti got in my mouth. Thanks for coming along on this quest with me, now it's time for you to go on your own quest.
-                  Have fun, there are endless lands to discover out there, until next time! Wizard out!
+                  *pft* *pft* Sorry. Some confetti got in my mouth. Thanks for coming along on this quest with me. Now it's time for you to go on your own quest.
+                  Have fun. There are endless lands to discover out there. Until next time! Wizard out!
                 </p>
               </v-col>
 

@@ -40,6 +40,7 @@ export default {
   },
   data() {
     return {
+        filtered: null,
       keys: null,
       selected: null,
       groupSelected: false,
@@ -80,10 +81,10 @@ export default {
   },
   methods: {
     init() {
+        this.filtered = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
       this.init_val = true;
       console.log('this.init called')
-      this.dataset = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
-      console.log(this.dataset)
+      console.log(this.filtered)
       this.x = null
       this.y = d3.scalePoint()
       this.brush = d3.brushX()
@@ -93,41 +94,42 @@ export default {
       this.update()
     },
     update() {
+        this.filtered = d3.filter(this.dataset, d => d.User_Score > 0 && d.Critic_Score > 0)
       console.log('this.update called')
 
       console.log("PC year range", this.yearRange);
       // add columns manually
       let columns = ['Critic_Score', 'User_Score', 'Total_Shipped', 'Global_Sales']
       console.log(this.attrVal);
-this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
+    // this.filtered = d3.filter(this.filtered, d => d[this.attrVal] != 0);
 
-      console.log("PC data: ", this.dataset);
+      console.log("PC data: ", this.filtered);
 
       if (this.selectedGroupStream) {
-        this.dataset = d3.filter(this.dataset, d => d[this.groupVal] == this.selectedGroupStream)
+        this.filtered = d3.filter(this.filtered, d => d[this.groupVal] == this.selectedGroupStream)
       }
       if (!(this.selectedGroupsBar == null) && this.selectedGroupsBar.values.length != 0) {
-        this.dataset = this.dataset.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib]))
+        this.filtered = this.filtered.filter(d => this.selectedGroupsBar.values.includes(d[this.selectedGroupsBar.attrib]))
       }
       if (this.yearRange != null) {
         if(this.yearRange[0] <= this.yearRange[1]){
           console.log(this.yearRange[0], "<=", this.yearRange[1]);
-          this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
+          this.filtered = d3.filter(this.filtered, d =>  d.Year.getUTCFullYear() >= this.yearRange[0] && d.Year.getUTCFullYear() <= this.yearRange[1])
         }else {
-          this.dataset = d3.filter(this.dataset, d =>  d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
+          this.filtered = d3.filter(this.filtered, d =>  d.Year.getUTCFullYear() <= this.yearRange[0] && d.Year.getUTCFullYear() >= this.yearRange[1])
         }
       }
 
-      this.dataset = Object.assign(this.dataset, {columns})
-      this.keys = this.dataset.columns
+      this.filtered = Object.assign(this.filtered, {columns})
+      this.keys = this.filtered.columns
       this.selections = new Map()
-      this.x = new Map(Array.from(this.keys, key => [key, d3.scaleLinear(d3.extent(this.dataset, d => d[key]),
+      this.x = new Map(Array.from(this.keys, key => [key, d3.scaleLinear(d3.extent(this.filtered, d => d[key]),
           [this.margin.left, this.width - this.margin.right])]))
       this.y = d3.scalePoint(this.keys, [this.margin.top, this.height - this.margin.bottom])
       this.brush = d3.brushX()
           .extent([
-            [this.margin.left, -(50 / 2)],
-            [this.width - this.margin.right, 50 / 2]
+            [this.margin.left, -(20 / 2)],
+            [this.width - this.margin.right, 20 / 2]
           ])
           .on("start brush end", this.brushed);
       d3.select('.pc_container')
@@ -138,9 +140,7 @@ this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
           .x(([key, value]) => this.x.get(key)(value))
           .y(([key]) => this.y(key))
       this.render_lines()
-      if (this.groupSelected == false) {
         this.render_axes()
-      }
     },
     render_axes() {
       d3.select(".pc-axes").selectAll("*").remove()
@@ -175,7 +175,7 @@ this.dataset = this.dataset.filter(d => d[this.attrVal] != 0);
           .attr('stroke-width', 1.5)
           .attr('stroke-opacity', 0.4)
           .selectAll('path')
-          .data(this.dataset)
+          .data(this.filtered)
           .join("path")
           .attr("stroke", 'steelblue')
           .attr("d", d => this.line(d3.cross(this.keys, [d], (key, d) => [key, d[key]])))
